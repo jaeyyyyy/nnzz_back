@@ -51,7 +51,6 @@ public class FindStoreService {
 
     private String getCurrentDayOfWeek() {
         Calendar calendar = Calendar.getInstance();
-        System.out.println(Calendar.DAY_OF_WEEK);
         String[] days = {"", "sun", "mon", "tue", "wed", "thu", "fri", "sat"};
 
         System.out.println("요일 : " + days[calendar.get(Calendar.DAY_OF_WEEK)]);

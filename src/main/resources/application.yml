@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: nnzz
+  profiles:
+    active: prod
+
+  graphql:
+    cors:
+      allowed-headers: "*"
+      allowed-methods: "*"
+      allow-credentials: true
+      allowed-origins:
+        - https://www.nnzz.today
+        - http://localhost:3000
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.nnzz.nnzz.model
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true

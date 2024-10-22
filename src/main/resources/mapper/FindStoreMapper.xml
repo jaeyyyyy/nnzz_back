@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- StoreMapper.xml -->
+<mapper namespace="com.nnzz.nnzz.repository.FindStoreMapper">
+
+    <!-- 1단계: 반경 750m 안의 store_id 가져오기 -->
+    <select id="get750NearbyStoreIds" resultType="String">
+        <![CDATA[
+            SELECT store_id
+            FROM store
+            WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 750
+            ]]>
+    </select>
+
+    <!-- 1단계: 반경 500m 안의 store_id 가져오기 -->
+    <select id="get500NearbyStoreIds" resultType="String">
+        <![CDATA[
+        SELECT store_id
+        FROM store
+        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 500
+        ]]>
+    </select>
+
+    <!-- 1단계: 반경 250m 안의 store_id 가져오기 -->
+    <select id="get250NearbyStoreIds" resultType="String">
+        <![CDATA[
+        SELECT store_id
+        FROM store
+        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 250
+        ]]>
+    </select>
+
+    <!-- 2단계: business_hours에서 조건에 맞는 store_id 가져오기 -->
+    <select id="getLunchValidStoreIds" resultType="String">
+        <![CDATA[
+            SELECT DISTINCT bh.store_id
+            FROM business_hours bh
+            WHERE bh.${currentDay} NOT LIKE '%휴무%'
+              AND bh.store_id IN]]>
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+                #{storeId}
+                </foreach>
+        <![CDATA[
+              AND EXISTS (
+              SELECT 1
+              FROM business_hours bh2
+              WHERE bh2.store_id = bh.store_id
+              AND bh2.business_type = 'O0001'
+              AND TIME_FORMAT(bh2.${currentDay}, '%H:%i') <= '12:00'
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM business_hours bh3
+              WHERE bh3.store_id = bh.store_id
+              AND bh3.business_type = 'C0001'
+              AND TIME_FORMAT(bh3.${currentDay}, '%H:%i') >= '12:00'
+          )
+            ]]>
+    </select>
+
+    <select id="getDinnerValidStoreIds" resultType="String">
+        <![CDATA[
+        SELECT DISTINCT bh.store_id
+        FROM business_hours bh
+        WHERE bh.${currentDay} NOT LIKE '%휴무%'
+          AND bh.store_id IN]]>
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+            </foreach>
+        <![CDATA[
+          AND EXISTS (
+              SELECT 1
+              FROM business_hours bh2
+              WHERE bh2.store_id = bh.store_id
+              AND bh2.business_type = 'O0001'
+              AND TIME_FORMAT(bh2.${currentDay}, '%H:%i') <= '18:00'
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM business_hours bh3
+              WHERE bh3.store_id = bh.store_id
+              AND bh3.business_type = 'C0001'
+              AND TIME_FORMAT(bh3.${currentDay}, '%H:%i') >= '18:00'
+          )
+        ]]>
+    </select>
+
+
+
+    <!-- 3단계: 최종적으로 category 가져오기 -->
+    <select id="getCategories" resultType="String">
+        SELECT DISTINCT ft.type1
+        FROM food_type ft
+        JOIN (
+            SELECT DISTINCT s.category
+            FROM store s
+            WHERE s.store_id IN
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+        </foreach>
+        ) AS categories ON ft.type2 = categories.category;
+    </select>
+</mapper>

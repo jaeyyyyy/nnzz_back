@@ -33,13 +33,14 @@ public class FindStoreController {
     @Parameters({
             @Parameter(name = "currentLat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "currentLong", description = "double 타입, 사용자의 경도", required = true),
-            @Parameter(name = "day", description = "아무 타입이든 괜찮으니 유저가 선택한 요일 정보를 넘겨주세요. 현재는 오늘 날짜만 가져오는 로직으로 설계되어 있습니다.", required = true),
+            @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd'형태, 사용자가 선택한 날짜", required = true),
     })
     @GetMapping("/lunch/category")
     public List<String> getLunchCategories() {
         double lng = 127.0276241;
         double lat = 37.4979526;
-        List<String> lunchCategoryList = findStoreService.getLunchCategoriesByLocation(lat, lng);
+        String day = "2024-11-01";
+        List<String> lunchCategoryList = findStoreService.getLunchCategoriesByLocation(lat, lng, day);
 
         return lunchCategoryList;
     }
@@ -54,13 +55,14 @@ public class FindStoreController {
     @Parameters({
             @Parameter(name = "currentLat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "currentLong", description = "double 타입, 사용자의 경도", required = true),
-            @Parameter(name = "day", description = "아무 타입이든 괜찮으니 유저가 선택한 요일 정보를 넘겨주세요. 현재는 오늘 날짜만 가져오는 로직으로 설계되어 있습니다.", required = true),
+            @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd'형태, 사용자가 선택한 날짜", required = true),
     })
     @GetMapping("/dinner/category")
     public List<String> getDinnerCategories() {
         double lng = 127.0276241;
         double lat = 37.4979526;
-        List<String> dinnerCategoryList = findStoreService.getDinnerCategoriesByLocation(lat, lng);
+        String day = "2024-11-01";
+        List<String> dinnerCategoryList = findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
 
         return dinnerCategoryList;
     }

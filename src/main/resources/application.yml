@@ -14,7 +14,7 @@ spring:
         - http://localhost:3000
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.nnzz.nnzz.model
+  type-aliases-package: com.nnzz.nnzz.dto
 
 server:
   servlet:

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <!-- StoreMapper.xml -->
 <mapper namespace="com.nnzz.nnzz.repository.FindStoreMapper">
 
@@ -101,4 +102,113 @@
         </foreach>
         ) AS categories ON ft.type2 = categories.category;
     </select>
+
+
+    <!--750미터 이내의 유저가 선택한 카테고리의 가게id 불러오기-->
+    <select id="getStores750NearbyAndByCategory" resultType="String">
+        <![CDATA[
+        SELECT s.store_id
+        FROM store s
+        JOIN food_type f ON s.category = f.type2
+        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 750
+        AND f.type1 IN
+        ]]>
+        <foreach item="category" collection="categories" open="(" separator="," close=")">
+            #{category}
+        </foreach>
+    </select>
+
+    <!--500미터 이내의 유저가 선택한 카테고리의 가게id 불러오기-->
+    <select id="getStores500NearbyAndByCategory" resultType="String">
+        <![CDATA[
+        SELECT s.store_id
+        FROM store s
+        JOIN food_type f ON s.category = f.type2
+        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 500
+        AND f.type1 IN
+        ]]>
+        <foreach item="category" collection="categories" open="(" separator="," close=")">
+            #{category}
+        </foreach>
+    </select>
+
+    <!--250미터 이내의 유저가 선택한 카테고리의 가게id 불러오기-->
+    <select id="getStores250NearbyAndByCategory" resultType="String">
+        <![CDATA[
+        SELECT s.store_id
+        FROM store s
+        JOIN food_type f ON s.category = f.type2
+        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 250
+        AND f.type1 IN
+        ]]>
+        <foreach item="category" collection="categories" open="(" separator="," close=")">
+            #{category}
+        </foreach>
+    </select>
+
+
+    <resultMap id="storeResultMap" type="StoreDTO">
+        <result property="storeId" column="store_id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="distance" column="distance"/>
+    </resultMap>
+
+    <select id="getFinalStores" resultMap="storeResultMap">
+        SELECT
+        s.store_id,
+        s.name,
+        s.address,
+        ST_Distance(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) AS distance
+        FROM store s
+        WHERE s.store_id IN
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+        </foreach>
+        ORDER BY distance
+    </select>
+
+    <resultMap id="menuResultMap" type="MenuDTO">
+        <result property="menuName" column="menu_name"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+    </resultMap>
+
+    <select id="getMenuInfo" resultMap="menuResultMap">
+        <![CDATA[
+        SELECT
+            m.menu_name,
+            m.description,
+            m.price
+        FROM menu m
+        WHERE m.store_id = #{storeId}
+          AND (
+            (SELECT COUNT(*) FROM menu WHERE store_id = #{storeId} AND represent = 'Y') >= 3 AND m.represent = 'Y'
+                OR (SELECT COUNT(*) FROM menu WHERE store_id = #{storeId} AND represent = 'Y') < 3
+            )
+        ORDER BY m.menu_id
+            LIMIT 3
+        ]]>
+    </select>
+
+    <resultMap id="broadcastResultMap" type="BroadcastDTO">
+        <result property="broadcastName" column="broadcast_name"/>
+        <result property="episode" column="episode"/>
+        <result property="broadcastDate" column="broadcast_date"/>
+        <result property="topic" column="topic"/>
+    </resultMap>
+
+    <select id="getBroadcastInfo" resultMap="broadcastResultMap">
+        SELECT b.broadcast_name, b.episode, b.broadcast_date, b.topic
+        FROM broadcast b
+        WHERE b.store_id = #{storeId}
+    </select>
+
+    <select id="getCategory" resultType="String">
+        SELECT f.type1
+        FROM food_type f
+        JOIN store s ON s.category = f.type2
+        WHERE s.store_id = #{storeId}
+    </select>
+
 </mapper>

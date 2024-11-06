@@ -8,10 +8,10 @@
     <!-- 1단계: 반경 750m 안의 store_id 가져오기 -->
     <select id="get750NearbyStoreIds" resultType="String">
         <![CDATA[
-            SELECT store_id
-            FROM store
-            WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 750
-            ]]>
+        SELECT store_id
+        FROM store
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 750
+        ]]>
     </select>
 
     <!-- 1단계: 반경 500m 안의 store_id 가져오기 -->
@@ -19,7 +19,7 @@
         <![CDATA[
         SELECT store_id
         FROM store
-        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 500
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 750
         ]]>
     </select>
 
@@ -28,62 +28,89 @@
         <![CDATA[
         SELECT store_id
         FROM store
-        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 250
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 750
         ]]>
     </select>
 
     <!-- 2단계: business_hours에서 조건에 맞는 store_id 가져오기 -->
     <select id="getLunchValidStoreIds" resultType="String">
         <![CDATA[
-            SELECT DISTINCT bh.store_id
-            FROM business_hours bh
-            WHERE bh.${currentDay} NOT LIKE '%휴무%'
-              AND bh.store_id IN]]>
-        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
-                #{storeId}
-                </foreach>
-        <![CDATA[
-              AND EXISTS (
-              SELECT 1
-              FROM business_hours bh2
-              WHERE bh2.store_id = bh.store_id
-              AND bh2.business_type = 'O0001'
-              AND TIME_FORMAT(bh2.${currentDay}, '%H:%i') <= '12:00'
-          )
-          AND EXISTS (
-              SELECT 1
-              FROM business_hours bh3
-              WHERE bh3.store_id = bh.store_id
-              AND bh3.business_type = 'C0001'
-              AND TIME_FORMAT(bh3.${currentDay}, '%H:%i') >= '12:00'
-          )
+        SELECT DISTINCT bh.store_id
+        FROM business_hours bh
+        WHERE bh.${currentDay} NOT LIKE '%휴무%'
+        ]]>
+        <if test="storeIds != null and storeIds.size() > 0">
+            <![CDATA[
+            AND bh.store_id IN
             ]]>
+            <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+                #{storeId}
+            </foreach>
+        </if>
+        <![CDATA[
+          AND EXISTS(
+        SELECT 1
+        FROM business_hours bh2
+        WHERE bh2.store_id = bh.store_id
+        AND (
+          (bh2.business_type = 'O0001' AND
+           (bh2.${currentDay} IS NOT NULL AND
+            bh2.${currentDay} NOT IN ('휴무', '정기휴무', '') AND
+            (bh2.${currentDay}::text NOT LIKE '%휴무%' AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') <= '12:00')))
+         OR (bh2.business_type = 'C0001' AND
+             (bh2.${currentDay} IS NOT NULL AND
+              bh2.${currentDay} NOT IN ('휴무', '정기휴무', '') AND
+              (bh2.${currentDay}::text NOT LIKE '%휴무%' AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') >= '12:00')))
+          )
+        )
+        ]]>
     </select>
+
 
     <select id="getDinnerValidStoreIds" resultType="String">
         <![CDATA[
         SELECT DISTINCT bh.store_id
         FROM business_hours bh
         WHERE bh.${currentDay} NOT LIKE '%휴무%'
-          AND bh.store_id IN]]>
-        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
-            #{storeId}
+        ]]>
+        <if test="storeIds != null and storeIds.size() > 0">
+            AND bh.store_id IN
+            <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+                #{storeId}
             </foreach>
+        </if>
         <![CDATA[
-          AND EXISTS (
-              SELECT 1
-              FROM business_hours bh2
-              WHERE bh2.store_id = bh.store_id
-              AND bh2.business_type = 'O0001'
-              AND TIME_FORMAT(bh2.${currentDay}, '%H:%i') <= '18:00'
-          )
-          AND EXISTS (
-              SELECT 1
-              FROM business_hours bh3
-              WHERE bh3.store_id = bh.store_id
-              AND bh3.business_type = 'C0001'
-              AND TIME_FORMAT(bh3.${currentDay}, '%H:%i') >= '18:00'
-          )
+        AND EXISTS (
+            SELECT 1
+            FROM business_hours bh2
+            WHERE bh2.store_id = bh.store_id
+            AND bh2.business_type = 'O0001'
+            AND bh2.${currentDay} IS NOT NULL
+            AND bh2.${currentDay} NOT IN ('휴무', '정기휴무', '')
+            AND bh2.${currentDay}::text NOT LIKE '%휴무%'
+            AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') <= '18:00'
+        )
+        AND EXISTS (
+            SELECT 1
+            FROM business_hours bh3, business_hours bh4
+            WHERE bh3.store_id = bh.store_id
+            AND bh4.store_id = bh.store_id
+            AND bh3.business_type = 'C0001'
+            AND bh4.business_type = 'O0001'
+            AND bh3.${currentDay} IS NOT NULL
+            AND bh3.${currentDay} NOT IN ('휴무', '정기휴무', '')
+            AND bh3.${currentDay}::text NOT LIKE '%휴무%'
+            AND bh4.${currentDay} IS NOT NULL
+            AND bh4.${currentDay} NOT IN ('휴무', '정기휴무', '')
+            AND bh4.${currentDay}::text NOT LIKE '%휴무%'
+            AND (
+                (TO_CHAR(bh4.${currentDay}::time, 'HH24:MI') <= TO_CHAR(bh3.${currentDay}::time, 'HH24:MI')
+                AND TO_CHAR(bh3.${currentDay}::time, 'HH24:MI') >= '18:00')
+                OR
+                (TO_CHAR(bh4.${currentDay}::time, 'HH24:MI') > TO_CHAR(bh3.${currentDay}::time, 'HH24:MI')
+                AND TO_CHAR(bh3.${currentDay}::time, 'HH24:MI') < '18:00')
+            )
+        )
         ]]>
     </select>
 
@@ -94,9 +121,9 @@
         SELECT DISTINCT ft.type1
         FROM food_type ft
         JOIN (
-            SELECT DISTINCT s.category
-            FROM store s
-            WHERE s.store_id IN
+        SELECT DISTINCT s.category
+        FROM store s
+        WHERE s.store_id IN
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
             #{storeId}
         </foreach>
@@ -110,7 +137,7 @@
         SELECT s.store_id
         FROM store s
         JOIN food_type f ON s.category = f.type2
-        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 750
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 750
         AND f.type1 IN
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
@@ -124,7 +151,7 @@
         SELECT s.store_id
         FROM store s
         JOIN food_type f ON s.category = f.type2
-        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 500
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 500
         AND f.type1 IN
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
@@ -138,7 +165,7 @@
         SELECT s.store_id
         FROM store s
         JOIN food_type f ON s.category = f.type2
-        WHERE ST_Distance(location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) <= 250
+        WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 250
         AND f.type1 IN
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
@@ -159,7 +186,7 @@
         s.store_id,
         s.name,
         s.address,
-        ST_Distance(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLat}, ' ', #{currentLong}, ')'), 4326)) AS distance
+        ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS distance
         FROM store s
         WHERE s.store_id IN
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
@@ -207,8 +234,92 @@
     <select id="getCategory" resultType="String">
         SELECT f.type1
         FROM food_type f
-        JOIN store s ON s.category = f.type2
+            JOIN store s ON s.category = f.type2
         WHERE s.store_id = #{storeId}
     </select>
 
+    <!--전체조회쿼리-->
+    <resultMap id="finalStoreResultMap" type="StoreDTO">
+        <result property="storeId" column="store_id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="distance" column="distance"/>
+        <result property="category" column="category"/>
+        <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+        <result property="broadcasts" column="broadcasts" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+    </resultMap>
+    <select id="getFinalStoresWithMenuAndBroadcast" resultMap="finalStoreResultMap">
+        <![CDATA[
+        WITH menu_counts AS (
+            SELECT store_id, COUNT(*) AS cnt
+            FROM menu
+            WHERE represent = 'Y'
+            GROUP BY store_id
+        ),
+        menu_data AS (
+            SELECT
+                m.store_id,
+                m.menu_name,
+                m.description,
+                m.price,
+                ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.menu_id) AS rn
+            FROM menu m
+            WHERE m.represent = 'Y'
+        )
+        SELECT
+            s.store_id,
+            s.name,
+            s.address,
+            ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS distance,
+            f.type1 AS category,
+            COALESCE(m.menus, '[]'::jsonb) AS menus,
+            COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
+        FROM
+            store s
+        LEFT JOIN
+            (SELECT st.store_id, f.type1
+            FROM store st
+            JOIN food_type f ON st.category = f.type2
+            WHERE st.store_id IN
+        ]]>
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+        </foreach>
+        <![CDATA[
+            GROUP BY st.store_id, f.type1) f ON s.store_id = f.store_id
+        LEFT JOIN
+            (SELECT
+                store_id,
+                jsonb_agg(
+                    jsonb_build_object(
+                        'menu_name', menu_name,
+                        'description', description,
+                        'price', price
+                    )
+                ) AS menus
+            FROM menu_data md
+            WHERE rn <= 3
+            AND store_id IN
+        ]]>
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+        </foreach>
+        <![CDATA[
+            GROUP BY store_id
+            ) m ON s.store_id = m.store_id
+        LEFT JOIN
+            (SELECT b.store_id, jsonb_agg(b) AS broadcasts
+            FROM broadcast b
+            GROUP BY b.store_id) b ON s.store_id = b.store_id
+        WHERE
+            s.store_id IN
+        ]]>
+        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+            #{storeId}
+        </foreach>
+        GROUP BY
+            s.store_id, s.name, s.address, s.location, f.type1, m.menus, b.broadcasts
+        ORDER BY
+            distance
+    </select>
 </mapper>

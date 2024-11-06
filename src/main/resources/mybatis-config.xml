@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeHandlers>
+        <typeHandler javaType="java.util.List" jdbcType="VARCHAR" handler="com.nnzz.nnzz.config.handler.JsonTypeHandler" />
+        <typeHandler javaType="java.util.List" jdbcType="VARCHAR" handler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+    </typeHandlers>
+    <!-- 기타 설정 -->
+</configuration>

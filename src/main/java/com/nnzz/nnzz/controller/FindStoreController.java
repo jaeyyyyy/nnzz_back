@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Tag(name="find categories", description = "카테고리 불러오기 API")
+@Tag(name="find stores", description = "음식점 찾기 API, 모든 api는 임의로 값을 넣어서 실행 중")
 @RestController
 @RequestMapping("/api/find")
 public class FindStoreController {
@@ -42,9 +43,7 @@ public class FindStoreController {
         double lng = 127.0276241;
         double lat = 37.4979526;
         String day = "2024-11-01";
-        List<String> lunchCategoryList = findStoreService.getLunchCategoriesByLocation(lat, lng, day);
-
-        return lunchCategoryList;
+        return findStoreService.getLunchCategoriesByLocation(lat, lng, day);
     }
 
     @Operation(summary = "get dinner categories", description = "직선거리 750m 내에 저녁 영업중인 가게들의 카테고리 찾기")
@@ -64,9 +63,7 @@ public class FindStoreController {
         double lng = 127.0276241;
         double lat = 37.4979526;
         String day = "2024-11-01";
-        List<String> dinnerCategoryList = findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
-
-        return dinnerCategoryList;
+        return findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
     }
 
     @Operation(summary = "get lunch 750", description = "직선거리 750m 내에 점심 영업중인 가게들의 리스트 찾기")
@@ -87,12 +84,12 @@ public class FindStoreController {
         categoryList.add("일식");
         List<String> storeIds = findStoreService.get750NearbyLunchStoreIds(lat, lng, day, categoryList);
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get dinner 750", description = "직선거리 750m 내에 저녁 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get dinner 750", description = "직선거리 750m 내에 저녁 영업중인 가게들의 리스트 찾기 / 실행시간 테스트를 위해 모든 카테고리를 선택했다고 가정(750미터 저녁만)")
     @Parameters({
             @Parameter(name = "currentLat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "currentLong", description = "double 타입, 사용자의 경도", required = true),
@@ -109,17 +106,21 @@ public class FindStoreController {
         categoryList.add("중식");
         categoryList.add("일식");
         categoryList.add("양식");
-        List<String> storeIds = findStoreService.get750NearbyDinnerStoreIds(lat, lng, day, categoryList);
+        List<String> allCategoryList = new ArrayList<>(Arrays.asList("한식", "탕과 국", "찌개,전골", "백숙,삼계탕", "냉면", "국수와 만두", "샤브샤브", "죽", "족발,보쌈", "전,빈대떡", "중식",
+                "일식", "초밥", "돈가스", "카레", "아시아음식", "분식", "양식", "멕시코,남미음식", "고기", "닭", "곱창,막창,양", "해물", "생선회", "피자", "햄버거", "빵", "술집", "뷔페", "다이어트,샐러드"));
 
-        for(String storeId : storeIds) {
-            System.out.println("storeIds 출력 : " + storeId);
-        }
+        List<String> storeIds = findStoreService.get750NearbyDinnerStoreIds(lat, lng, day, allCategoryList);
+
+//        for(String storeId : storeIds) {
+//            System.out.println("storeIds 출력 : " + storeId);
+//        }
         System.out.println("storeIds는 " + storeIds.size() + "개 입니다.");
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println("storeDetails는 " + storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }
+
 
     @Operation(summary = "get lunch 500", description = "직선거리 500m 내에 점심 영업중인 가게들의 리스트 찾기")
     @Parameters({
@@ -139,7 +140,7 @@ public class FindStoreController {
         categoryList.add("일식");
         List<String> storeIds = findStoreService.get500NearbyLunchStoreIds(lat, lng, day, categoryList);
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }
@@ -162,7 +163,7 @@ public class FindStoreController {
         categoryList.add("일식");
         List<String> storeIds = findStoreService.get500NearbyDinnerStoreIds(lat, lng, day, categoryList);
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }
@@ -185,7 +186,7 @@ public class FindStoreController {
         categoryList.add("일식");
         List<String> storeIds = findStoreService.get250NearbyLunchStoreIds(lat, lng, day, categoryList);
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }
@@ -208,7 +209,7 @@ public class FindStoreController {
         categoryList.add("일식");
         List<String> storeIds = findStoreService.get250NearbyDinnerStoreIds(lat, lng, day, categoryList);
 
-        List<StoreDTO> storeDetails = findStoreService.getStoreDetails(lat, lng, storeIds);
+        List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
     }

@@ -27,12 +27,18 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 	implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
+
+	implementation("org.postgresql:postgresql:42.7.3")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 	implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
+
 	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("com.mysql:mysql-connector-j")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	// runtimeOnly("com.mysql:mysql-connector-j")
+
+
 	testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

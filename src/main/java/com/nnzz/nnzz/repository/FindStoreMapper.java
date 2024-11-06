@@ -50,4 +50,8 @@ public interface FindStoreMapper {
 
     // 카테고리 가져오기
     String getCategory(@Param("storeId") String storeId);
+
+    // 전체 리스트 가져오기
+    List<StoreDTO> getFinalStoresWithMenuAndBroadcast(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("storeIds") List<String> storeIds);
+
 }

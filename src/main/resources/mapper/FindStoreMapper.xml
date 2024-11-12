@@ -32,7 +32,7 @@
         ]]>
     </select>
 
-    <!-- 2단계: business_hours에서 조건에 맞는 store_id 가져오기 -->
+    <!-- 2단계: business_hours에서 조건에 맞는 점심 가능 store_id 가져오기 -->
     <select id="getLunchValidStoreIds" resultType="String">
         <![CDATA[
         SELECT DISTINCT bh.store_id
@@ -66,7 +66,7 @@
         ]]>
     </select>
 
-
+    <!-- 2단계: business_hours에서 조건에 맞는 저녁 가능 store_id 가져오기 -->
     <select id="getDinnerValidStoreIds" resultType="String">
         <![CDATA[
         SELECT DISTINCT bh.store_id
@@ -117,17 +117,21 @@
 
 
     <!-- 3단계: 최종적으로 category 가져오기 -->
-    <select id="getCategories" resultType="String">
-        SELECT DISTINCT ft.type1
+    <select id="getCategories" resultType="CategoryDTO">
+        <![CDATA[
+        SELECT ft.type1 AS category,
+        FLOOR(MIN(ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)))) AS distance
         FROM food_type ft
         JOIN (
-        SELECT DISTINCT s.category
+        SELECT DISTINCT s.category, s.location
         FROM store s
         WHERE s.store_id IN
+        ]]>
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
             #{storeId}
         </foreach>
-        ) AS categories ON ft.type2 = categories.category;
+        ) AS categories ON ft.type2 = categories.category
+        GROUP BY ft.type1
     </select>
 
 
@@ -270,7 +274,8 @@
             s.store_id,
             s.name,
             s.address,
-            ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS distance,
+            ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS original_distance,
+            FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
             COALESCE(m.menus, '[]'::jsonb) AS menus,
             COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
@@ -278,9 +283,9 @@
             store s
         LEFT JOIN
             (SELECT st.store_id, f.type1
-            FROM store st
-            JOIN food_type f ON st.category = f.type2
-            WHERE st.store_id IN
+             FROM store st
+             JOIN food_type f ON st.category = f.type2
+             WHERE st.store_id IN
         ]]>
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
             #{storeId}
@@ -320,6 +325,6 @@
         GROUP BY
             s.store_id, s.name, s.address, s.location, f.type1, m.menus, b.broadcasts
         ORDER BY
-            distance
+            original_distance
     </select>
 </mapper>

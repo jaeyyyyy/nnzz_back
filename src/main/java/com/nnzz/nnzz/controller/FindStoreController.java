@@ -1,5 +1,6 @@
 package com.nnzz.nnzz.controller;
 
+import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
 import com.nnzz.nnzz.service.FindStoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +40,7 @@ public class FindStoreController {
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
     })
     @GetMapping("/lunch/category")
-    public List<String> getLunchCategories() {
+    public List<CategoryDTO> getLunchCategories() {
         double lng = 127.0276241;
         double lat = 37.4979526;
         String day = "2024-11-01";
@@ -59,7 +60,7 @@ public class FindStoreController {
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
     })
     @GetMapping("/dinner/category")
-    public List<String> getDinnerCategories() {
+    public List<CategoryDTO> getDinnerCategories() {
         double lng = 127.0276241;
         double lat = 37.4979526;
         String day = "2024-11-01";

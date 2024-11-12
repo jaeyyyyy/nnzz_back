@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @Getter
@@ -13,4 +14,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class CategoryDTO {
     private String category;
+    private Integer distance;
+    private List<String> represent;
 }

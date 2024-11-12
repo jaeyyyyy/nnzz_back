@@ -1,6 +1,7 @@
 package com.nnzz.nnzz.repository;
 
 import com.nnzz.nnzz.dto.BroadcastDTO;
+import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -26,7 +27,7 @@ public interface FindStoreMapper {
     List<String> getDinnerValidStoreIds(@Param("storeIds") List<String> storeIds, @Param("currentDay") String currentDay);
 
     // 3단계: 최종적으로 category 가져오기
-    List<String> getCategories(@Param("storeIds") List<String> storeIds);
+    List<CategoryDTO> getCategories(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("storeIds") List<String> storeIds);
 
 
 

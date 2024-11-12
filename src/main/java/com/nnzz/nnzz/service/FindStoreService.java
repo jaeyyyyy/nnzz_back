@@ -1,6 +1,7 @@
 package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.dto.BroadcastDTO;
+import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
 import com.nnzz.nnzz.repository.FindStoreMapper;
@@ -25,7 +26,7 @@ public class FindStoreService {
 
     // 1. 현재 선택 가능한 카테고리를 가져오기
     // 점심 가능 카테고리 가져오기
-    public List<String> getLunchCategoriesByLocation(double currentLat, double currentLong, String dateString) {
+    public List<CategoryDTO> getLunchCategoriesByLocation(double currentLat, double currentLong, String dateString) {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
 
@@ -36,12 +37,12 @@ public class FindStoreService {
         List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
 
         // 3단계 : 최종적으로 category 가져오기
-        List<String> validCategories = findStoreMapper.getCategories(validStoreIds);
+        List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
         return validCategories;
     }
 
     // 저녁 가능 카테고리 가져오기
-    public List<String> getDinnerCategoriesByLocation(double currentLat, double currentLong, String dateString) {
+    public List<CategoryDTO> getDinnerCategoriesByLocation(double currentLat, double currentLong, String dateString) {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
 
@@ -52,7 +53,7 @@ public class FindStoreService {
         List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
 
         // 3단계 : 최종적으로 category 가져오기
-        List<String> validCategories = findStoreMapper.getCategories(validStoreIds);
+        List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
         return validCategories;
     }
 

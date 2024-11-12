@@ -252,7 +252,7 @@
         <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
         <result property="broadcasts" column="broadcasts" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
     </resultMap>
-    <select id="getFinalStoresWithMenuAndBroadcast" resultMap="finalStoreResultMap">
+    <select id="getFinalStoresDetail" resultMap="finalStoreResultMap">
         <![CDATA[
         WITH menu_counts AS (
             SELECT store_id, COUNT(*) AS cnt
@@ -266,9 +266,8 @@
                 m.menu_name,
                 m.description,
                 m.price,
-                ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.menu_id) AS rn
+                ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.represent DESC, m.menu_id) AS rn
             FROM menu m
-            WHERE m.represent = 'Y'
         )
         SELECT
             s.store_id,
@@ -277,8 +276,25 @@
             ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS original_distance,
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
-            COALESCE(m.menus, '[]'::jsonb) AS menus,
-            COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
+        CASE
+            WHEN mc.cnt >= 3 THEN
+                COALESCE(jsonb_agg(
+                    jsonb_build_object(
+                        'menu_name', md.menu_name,
+                        'description', md.description,
+                        'price', md.price
+                    )
+                ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+            ELSE
+                COALESCE(jsonb_agg(
+                    jsonb_build_object(
+                        'menu_name', md.menu_name,
+                        'description', md.description,
+                        'price', md.price
+                    )
+                ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+        END AS menus,
+        COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
         FROM
             store s
         LEFT JOIN
@@ -291,40 +307,100 @@
             #{storeId}
         </foreach>
         <![CDATA[
-            GROUP BY st.store_id, f.type1) f ON s.store_id = f.store_id
+             ) f ON s.store_id = f.store_id
         LEFT JOIN
-            (SELECT
-                store_id,
-                jsonb_agg(
-                    jsonb_build_object(
-                        'menu_name', menu_name,
-                        'description', description,
-                        'price', price
-                    )
-                ) AS menus
-            FROM menu_data md
-            WHERE rn <= 3
-            AND store_id IN
-        ]]>
-        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
-            #{storeId}
-        </foreach>
-        <![CDATA[
-            GROUP BY store_id
-            ) m ON s.store_id = m.store_id
+            menu_counts mc ON s.store_id = mc.store_id
+        LEFT JOIN
+            menu_data md ON s.store_id = md.store_id
         LEFT JOIN
             (SELECT b.store_id, jsonb_agg(b) AS broadcasts
             FROM broadcast b
             GROUP BY b.store_id) b ON s.store_id = b.store_id
         WHERE
-            s.store_id IN
+            s.store_id in
         ]]>
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
             #{storeId}
         </foreach>
+        <![CDATA[
+    GROUP BY
+        s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts
+    ORDER BY
+        original_distance
+        ]]>
+    </select>
+
+    <!--가게 하나 조회 쿼리-->
+    <resultMap id="oneStoreResultMap" type="StoreDTO">
+        <result property="storeId" column="store_id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="distance" column="distance"/>
+        <result property="category" column="category"/>
+        <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+        <result property="broadcasts" column="broadcasts" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+    </resultMap>
+    <select id="getOneStoreDetail" resultMap="oneStoreResultMap">
+        <![CDATA[
+        WITH menu_counts AS (
+            SELECT store_id, COUNT(*) AS cnt
+            FROM menu
+            WHERE represent = 'Y'
+            GROUP BY store_id
+        ),
+             menu_data AS (
+                 SELECT
+                     m.store_id,
+                     m.menu_name,
+                     m.description,
+                     m.price,
+                     ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.represent DESC, m.menu_id) AS rn
+                 FROM menu m
+             )
+        SELECT
+            s.store_id,
+            s.name,
+            s.address,
+            FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
+            f.type1 AS category,
+            CASE
+                WHEN mc.cnt >= 3 THEN
+                    COALESCE(jsonb_agg(
+                                     jsonb_build_object(
+                                             'menu_name', md.menu_name,
+                                             'description', md.description,
+                                             'price', md.price
+                                     )
+                             ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+                ELSE
+                    COALESCE(jsonb_agg(
+                                     jsonb_build_object(
+                                             'menu_name', md.menu_name,
+                                             'description', md.description,
+                                             'price', md.price
+                                     )
+                             ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+                END AS menus,
+            COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
+        FROM
+            store s
+                LEFT JOIN
+            (SELECT st.store_id, f.type1
+             FROM store st
+                      JOIN food_type f ON st.category = f.type2
+             WHERE st.store_id = #{storeId}) f ON s.store_id = f.store_id
+                LEFT JOIN
+            menu_counts mc ON s.store_id = mc.store_id
+                LEFT JOIN
+            menu_data md ON s.store_id = md.store_id
+                LEFT JOIN
+            (SELECT b.store_id, jsonb_agg(b) AS broadcasts
+             FROM broadcast b
+             GROUP BY b.store_id) b ON s.store_id = b.store_id
+        WHERE
+            s.store_id = #{storeId}
         GROUP BY
-            s.store_id, s.name, s.address, s.location, f.type1, m.menus, b.broadcasts
-        ORDER BY
-            original_distance
+            s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts
+        ]]>
     </select>
 </mapper>

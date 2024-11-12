@@ -215,8 +215,14 @@ public class FindStoreService {
 
     // 전체 가게 정보 한 번에 가져오기
     public List<StoreDTO> getFinalStoresWithMenuAndBroadcast(double currentLat, double currentLong, List<String> storeIds) {
-        List<StoreDTO> stores = findStoreMapper.getFinalStoresWithMenuAndBroadcast(currentLat, currentLong, storeIds);
+        List<StoreDTO> stores = findStoreMapper.getFinalStoresDetail(currentLat, currentLong, storeIds);
 
         return stores;
+    }
+
+    public StoreDTO getOneStoreDetail(double currentLat, double currentLong, String storeId) {
+        StoreDTO store = findStoreMapper.getOneStoreDetail(currentLat, currentLong, storeId);
+
+        return store;
     }
 }

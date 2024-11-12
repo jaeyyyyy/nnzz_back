@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -213,5 +214,20 @@ public class FindStoreController {
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
         System.out.println(storeDetails.size() + "개 입니다.");
         return ResponseEntity.ok(storeDetails);
+    }
+
+    @Operation(summary = "get one store detail", description = "가게 1곳의 정보를 가져오기")
+    @Parameters({
+            @Parameter(name = "currentLat", description = "double 타입, 사용자의 위도", required = true),
+            @Parameter(name = "currentLong", description = "double 타입, 사용자의 경도", required = true),
+            @Parameter(name = "storeId", description = "String 타입, 가게의 id", required = true)
+    })
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<StoreDTO> getOneStoreDetail(@PathVariable("storeId") String storeId) {
+        double lng = 127.0276241;
+        double lat = 37.4979526;
+        StoreDTO store = findStoreService.getOneStoreDetail(lat, lng, storeId);
+
+        return ResponseEntity.ok(store);
     }
 }

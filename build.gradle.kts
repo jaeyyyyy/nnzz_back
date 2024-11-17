@@ -41,6 +41,9 @@ dependencies {
 
 	testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	//oauth
+	// implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 }
 
 tasks.withType<Test> {

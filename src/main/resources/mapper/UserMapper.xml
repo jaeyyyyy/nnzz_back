@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- UserMapper.xml -->
+<mapper namespace="com.nnzz.nnzz.repository.UserMapper">
+    <!--유저 추가-->
+    <insert id="createUser" parameterType="UserDTO">
+        INSERT INTO users (email, nickname, profile_image, gender, age_range)
+        VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange})
+    </insert>
+
+
+    <!--해당하는 이메일의 유저가 있는지를 확인-->
+    <select id="existsUserByEmail" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM users
+            WHERE email = #{email}
+        )
+    </select>
+
+    <!--해당하는 닉네임의 유저가 있는지를 확인-->
+    <select id="existsUserByNickname" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM users
+            WHERE nickname = #{nickname}
+        )
+    </select>
+</mapper>

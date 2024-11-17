@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +23,9 @@ import java.util.List;
 @Tag(name="find stores", description = "음식점 찾기 API, 모든 api는 임의로 값을 넣어서 실행 중")
 @RestController
 @RequestMapping("/api/find")
+@RequiredArgsConstructor
 public class FindStoreController {
-
-    @Autowired
-    private FindStoreService findStoreService;
+    private final FindStoreService findStoreService;
 
     @Operation(summary = "get lunch categories", description = "직선거리 750m 내에 점심 영업중인 가게들의 카테고리 찾기")
     @ApiResponses(value = {

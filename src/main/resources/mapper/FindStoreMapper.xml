@@ -119,19 +119,21 @@
     <!-- 3단계: 최종적으로 category 가져오기 -->
     <select id="getCategories" resultType="CategoryDTO">
         <![CDATA[
-        SELECT ft.type1 AS category,
-        FLOOR(MIN(ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)))) AS distance
+        SELECT
+            ft.type1 AS category,
+            ft.represent_menu AS represent,
+            FLOOR(MIN(ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)))) AS distance
         FROM food_type ft
         JOIN (
-        SELECT DISTINCT s.category, s.location
-        FROM store s
-        WHERE s.store_id IN
+            SELECT DISTINCT s.category, s.location
+            FROM store s
+            WHERE s.store_id IN
         ]]>
-        <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
-            #{storeId}
-        </foreach>
+            <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
+                #{storeId}
+            </foreach>
         ) AS categories ON ft.type2 = categories.category
-        GROUP BY ft.type1
+        GROUP BY ft.type1, ft.represent_menu
     </select>
 
 

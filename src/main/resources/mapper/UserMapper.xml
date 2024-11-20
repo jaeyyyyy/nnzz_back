@@ -3,6 +3,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- UserMapper.xml -->
 <mapper namespace="com.nnzz.nnzz.repository.UserMapper">
+    <!--현재 유저가 누군지 확인-->
+    <select id="findUserByIdx" resultType="UserDTO">
+        SELECT *
+        FROM users
+        WHERE idx=#{idx}
+    </select>
+
     <!--유저 추가-->
     <insert id="createUser" parameterType="UserDTO">
         INSERT INTO users (email, nickname, profile_image, gender, age_range)

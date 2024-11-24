@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
+    // 회원 가입과 로그인을 함께하는 것으로 수정할 예정
     @Operation(summary = "register user", description = "회원 정보를 db에 저장")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -48,7 +49,43 @@ public class UserController {
         }
     }
 
-    // 닉네임 중복여부만 체크
+    // 회원 정보 업데이트
+    @Operation(summary = "update user", description = "회원정보를 db에 업데이트")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "경로의 회원 pk(userId)와 본문의 회원 pk가 일치하지 않음"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임 또는 존재하지 않는 유저")
+    })
+    @Parameters({
+            @Parameter(name = "userId", description = "회원 pk(userId, 자동증가 Integer 형태)", required = true),
+            @Parameter(name = "nickname", description = "닉네임", required = true),
+            @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true),
+            @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
+            @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
+    })
+    @PatchMapping("/update/{userId}")
+    public ResponseEntity<String> updateUser(@RequestBody UserDTO user, @PathVariable Integer userId) {
+        // 요청 본문에서 가져온 닉네임
+        String nickname = user.getNickname();
+        // 요청 본문에서 가져온 userId
+        Integer requestUserId = user.getUserId();
+
+        if(!userId.equals(requestUserId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("경로의 userId와 본문에 있는 userId가 일치하지 않습니다.");
+        }
+
+        if(userService.checkUserIdExists(userId)) {
+            if(userService.checkNicknameExists(nickname)){
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 닉네임입니다.");
+            }
+            userService.updateUser(user);
+            return ResponseEntity.ok("사용자가 성공적으로 업데이트되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("존재하지 않는 사용자입니다.");
+        }
+    }
+
+        // 닉네임 중복여부만 체크
     @Operation(summary = "check nickname duplicate", description = "중복된 닉네임인지 확인")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),

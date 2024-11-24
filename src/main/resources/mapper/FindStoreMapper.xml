@@ -53,15 +53,15 @@
         FROM business_hours bh2
         WHERE bh2.store_id = bh.store_id
         AND (
-          (bh2.business_type = 'O0001' AND
-           (bh2.${currentDay} IS NOT NULL AND
+            (bh2.business_type = 'O0001' AND
+            (bh2.${currentDay} IS NOT NULL AND
             bh2.${currentDay} NOT IN ('휴무', '정기휴무', '') AND
             (bh2.${currentDay}::text NOT LIKE '%휴무%' AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') <= '12:00')))
-         OR (bh2.business_type = 'C0001' AND
-             (bh2.${currentDay} IS NOT NULL AND
-              bh2.${currentDay} NOT IN ('휴무', '정기휴무', '') AND
-              (bh2.${currentDay}::text NOT LIKE '%휴무%' AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') >= '12:00')))
-          )
+        OR (bh2.business_type = 'C0001' AND
+            (bh2.${currentDay} IS NOT NULL AND
+            bh2.${currentDay} NOT IN ('휴무', '정기휴무', '') AND
+            (bh2.${currentDay}::text NOT LIKE '%휴무%' AND TO_CHAR(bh2.${currentDay}::time, 'HH24:MI') >= '12:00')))
+            )
         )
         ]]>
     </select>
@@ -189,10 +189,10 @@
 
     <select id="getFinalStores" resultMap="storeResultMap">
         SELECT
-        s.store_id,
-        s.name,
-        s.address,
-        ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS distance
+            s.store_id,
+            s.name,
+            s.address,
+            ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS distance
         FROM store s
         WHERE s.store_id IN
         <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
@@ -215,8 +215,8 @@
             m.price
         FROM menu m
         WHERE m.store_id = #{storeId}
-          AND (
-            (SELECT COUNT(*) FROM menu WHERE store_id = #{storeId} AND represent = 'Y') >= 3 AND m.represent = 'Y'
+            AND (
+                (SELECT COUNT(*) FROM menu WHERE store_id = #{storeId} AND represent = 'Y') >= 3 AND m.represent = 'Y'
                 OR (SELECT COUNT(*) FROM menu WHERE store_id = #{storeId} AND represent = 'Y') < 3
             )
         ORDER BY m.menu_id
@@ -262,15 +262,15 @@
             WHERE represent = 'Y'
             GROUP BY store_id
         ),
-        menu_data AS (
-            SELECT
-                m.store_id,
-                m.menu_name,
-                m.description,
-                m.price,
-                ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.represent DESC, m.menu_id) AS rn
-            FROM menu m
-        )
+            menu_data AS (
+                SELECT
+                    m.store_id,
+                    m.menu_name,
+                    m.description,
+                    m.price,
+                    ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.represent DESC, m.menu_id) AS rn
+                FROM menu m
+            )
         SELECT
             s.store_id,
             s.name,
@@ -295,7 +295,7 @@
                         'price', md.price
                     )
                 ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
-        END AS menus,
+            END AS menus,
         COALESCE(b.broadcasts, '[]'::jsonb) AS broadcasts
         FROM
             store s

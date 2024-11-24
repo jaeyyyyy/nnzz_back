@@ -5,12 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    private Integer idx;
+    private Integer userId;
     private String email;
     private String nickname;
     private String profileImage;

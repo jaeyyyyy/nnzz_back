@@ -2,14 +2,106 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nnzz.nnzz.repository.CardMapper">
-    <!--유저가 최종선택한 음식을 조회하기-->
-    <!--    <select id="">-->
+    <!--유저가 최종선택한 가게의 카테고리를 food_type 테이블을 통해서 조회하기-->
+    <select id="getSelectStoreCategory" parameterType="String" resultType="Integer">
+        SELECT food_type_id
+        FROM food_type ft
+                 JOIN (
+            SELECT category
+            FROM store s
+            WHERE store_id = #{storeId}
+        ) AS category ON ft.type2 = category.category
+    </select>
 
-    <!--    </select>-->
 
+    <!--유저가 최종선택한 음식을 db에 저장하고 cardId 반환하기-->
+    <insert id="createCard" parameterType="SaveCardDTO" useGeneratedKeys="true" keyProperty="cardId">
+        INSERT INTO card(user_id, store_id, food_type_id)
+        VALUES (#{userId}, #{storeId}, #{foodTypeId})
+    </insert>
 
-    <!--유저가 최종선택한 음식을 db에 저장하기-->
-    <!--    <insert id="">-->
+    <!--카드 소개문구 가져오기-->
+    <select id="getCardDescription" parameterType="Integer" resultType="String">
+        SELECT description
+        FROM food_type ft
+                 JOIN (
+            SELECT food_type_id
+            FROM card c
+            WHERE card_id = #{cardId}
+        ) AS category ON ft.food_type_id = category.food_type_id
+    </select>
 
-    <!--    </insert>-->
+    <!--저장된 카드 정보 가져오기-->
+    <select id="getCardInfo" parameterType="Integer" resultType="SaveCardDTO">
+        SELECT card_id, user_id, food_type_id
+        FROM card c
+        WHERE card_id = #{cardId}
+    </select>
+
+    <!--카드에 쓸 전체 정보 가져오기-->
+    <resultMap id="CardResultMap" type="ShowCardDTO">
+        <result property="cardId" column="card_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="storeId" column="store_id"/>
+        <result property="foodTypeId" column="food_type_id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="category" column="category"/>
+        <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+    </resultMap>
+    <select id="getCardFullInfo" resultMap="CardResultMap">
+        <![CDATA[
+        WITH menu_counts AS (
+            SELECT store_id, COUNT(*) AS cnt
+            FROM menu
+            WHERE represent = 'Y'
+            GROUP BY store_id
+        ),
+             menu_data AS (
+                 SELECT
+                     m.store_id,
+                     m.menu_name,
+                     m.description,
+                     m.price,
+                     ROW_NUMBER() OVER (PARTITION BY m.store_id ORDER BY m.represent DESC, m.menu_id) AS rn
+                 FROM menu m
+             )
+        SELECT
+            c.card_id,
+            c.user_id,
+            c.food_type_id,
+            s.store_id,
+            s.name AS name,
+            s.address AS address,
+            ft.type1 AS category,
+            CASE
+                WHEN mc.cnt >= 3 THEN
+                    COALESCE(jsonb_agg(
+                                     jsonb_build_object(
+                                             'menu_name', md.menu_name,
+                                             'description', md.description,
+                                             'price', md.price
+                                     )
+                             ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+                ELSE
+                    COALESCE(jsonb_agg(
+                                     jsonb_build_object(
+                                             'menu_name', md.menu_name,
+                                             'description', md.description,
+                                             'price', md.price
+                                     )
+                             ) FILTER (WHERE md.rn <= 3), '[]'::jsonb)
+                END AS menus
+        FROM
+            card c
+                JOIN store s ON c.store_id = s.store_id  -- card의 store_id를 사용하여 store와 조인
+                LEFT JOIN food_type ft ON c.food_type_id = ft.food_type_id  -- food_type_id로 food_type을 조인
+                LEFT JOIN menu_counts mc ON s.store_id = mc.store_id
+                LEFT JOIN menu_data md ON s.store_id = md.store_id
+        WHERE
+            c.card_id = #{cardId}
+        GROUP BY
+            c.card_id, c.user_id, c.food_type_id, s.store_id, s.name, s.address, ft.type1, mc.cnt;
+        ]]>
+    </select>
 </mapper>

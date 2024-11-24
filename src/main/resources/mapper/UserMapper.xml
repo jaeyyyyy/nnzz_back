@@ -4,10 +4,10 @@
 <!-- UserMapper.xml -->
 <mapper namespace="com.nnzz.nnzz.repository.UserMapper">
     <!--현재 유저가 누군지 확인-->
-    <select id="findUserByIdx" resultType="UserDTO">
+    <select id="findUserByUserId" resultType="UserDTO">
         SELECT *
         FROM users
-        WHERE idx=#{idx}
+        WHERE user_id=#{userId}
     </select>
 
     <!--유저 추가-->
@@ -16,6 +16,12 @@
         VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange})
     </insert>
 
+    <!--유저 정보 수정-->
+    <update id="updateUser" parameterType="UserDTO">
+        UPDATE users
+        SET nickname = #{nickname}, profile_image = #{profileImage}, gender = #{gender}, age_range = #{ageRange}
+        WHERE user_id = #{userId}
+    </update>
 
     <!--해당하는 이메일의 유저가 있는지를 확인-->
     <select id="existsUserByEmail" resultType="boolean">
@@ -32,6 +38,16 @@
             SELECT 1
             FROM users
             WHERE nickname = #{nickname}
+        )
+    </select>
+
+
+    <!--해당하는 user_id의 유저가 있는지를 확인-->
+    <select id="existsUserByUserId" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM users
+            WHERE user_id = #{userId}
         )
     </select>
 </mapper>

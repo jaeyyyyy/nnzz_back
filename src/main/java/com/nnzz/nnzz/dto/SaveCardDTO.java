@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
-    private String category;
-    private Integer distance;
-    private String represent;
+public class SaveCardDTO {
+    private Integer cardId;
+    private Integer userId;
+    private String storeId;
+    private Integer foodTypeId;
 }

@@ -30,6 +30,10 @@ public class FindStoreService {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
 
+        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+            return new ArrayList<>(); // 빈 리스트 반환
+        }
+
         // 오늘의 요일 가져오기
         String currentDay = getCurrentDayOfWeek(dateString);
 
@@ -38,6 +42,8 @@ public class FindStoreService {
 
         // 3단계 : 최종적으로 category 가져오기
         List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+
+
         return validCategories;
     }
 
@@ -45,6 +51,10 @@ public class FindStoreService {
     public List<CategoryDTO> getDinnerCategoriesByLocation(double currentLat, double currentLong, String dateString) {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+            return new ArrayList<>(); // 빈 리스트 반환
+        }
 
         // 오늘의 요일 가져오기
         String currentDay = getCurrentDayOfWeek(dateString);

@@ -17,5 +17,7 @@ public interface UserMapper {
 
     boolean existsUserByUserId(int userId);
 
-    Optional<UserDTO> findUserByUserId(int userId);
+    UserDTO findUserByUserId(int userId);
+    UserDTO findUserByEmail(String email);
+    UserDTO findUserByLoginId(String loginId);
 }

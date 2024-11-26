@@ -9,11 +9,11 @@ spring:
       client:
         registration:
           kakao:
-            clientId: '{카카오 client-id}'
-            clientSecret: '{카카오 client-secret}'
+            client-id: ${client-id}
+            client-secret: ${client-secret}
             client-authentication-method: post
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+            redirect-uri: http://localhost:8080/auth/login
             ## 서버에서 인증을 마치고 돌아가는 callback uri
             scope:
               - account_email

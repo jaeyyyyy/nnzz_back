@@ -13,14 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name="users", description = "회원 가입 및 회원 관리")
+@Tag(name="users", description = "냠냠쩝쩝 회원 추가 설정 및 회원 관리")
 @RestController
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
-    // 회원 가입과 로그인을 함께하는 것으로 수정할 예정
+    // 여기에는 냠냠쩝쩝에서 설정가능한 정보를 넣을 예정임
     @Operation(summary = "register user", description = "회원 정보를 db에 저장")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),

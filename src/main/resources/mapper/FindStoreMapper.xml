@@ -32,17 +32,17 @@
         ]]>
     </select>
 
-    <!-- 2단계: business_hours에서 조건에 맞는 점심 가능 store_id 가져오기 -->
+    <!-- 2단계: 폐업하지 않았고 business_hours에서 조건에 맞는 점심 가능 store_id 가져오기 -->
     <select id="getLunchValidStoreIds" resultType="String">
         <![CDATA[
         SELECT DISTINCT bh.store_id
         FROM business_hours bh
-        WHERE bh.${currentDay} NOT LIKE '%휴무%'
+        INNER JOIN store s ON bh.store_id = s.store_id
+        WHERE s.close = false
+          AND bh.${currentDay} NOT LIKE '%휴무%'
         ]]>
         <if test="storeIds != null and storeIds.size() > 0">
-            <![CDATA[
             AND bh.store_id IN
-            ]]>
             <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
                 #{storeId}
             </foreach>
@@ -66,12 +66,14 @@
         ]]>
     </select>
 
-    <!-- 2단계: business_hours에서 조건에 맞는 저녁 가능 store_id 가져오기 -->
+    <!-- 2단계: 폐업하지 않았고 business_hours에서 조건에 맞는 저녁 가능 store_id 가져오기 -->
     <select id="getDinnerValidStoreIds" resultType="String">
         <![CDATA[
         SELECT DISTINCT bh.store_id
         FROM business_hours bh
-        WHERE bh.${currentDay} NOT LIKE '%휴무%'
+        INNER JOIN store s ON bh.store_id = s.store_id
+        WHERE s.close = false
+          AND bh.${currentDay} NOT LIKE '%휴무%'
         ]]>
         <if test="storeIds != null and storeIds.size() > 0">
             AND bh.store_id IN

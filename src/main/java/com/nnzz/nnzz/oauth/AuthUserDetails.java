@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class OauthUserDetails implements UserDetails {
+public class AuthUserDetails implements UserDetails {
 
     private final UserDTO user;
     private final Map<String, Object> attributes;
 
-    public OauthUserDetails(UserDTO user, Map<String, Object> attributes) {
+    public AuthUserDetails(UserDTO user, Map<String, Object> attributes) {
         this.user = user;
         this.attributes = attributes;
     }

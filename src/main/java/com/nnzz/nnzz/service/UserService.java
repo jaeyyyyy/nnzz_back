@@ -14,8 +14,14 @@ public class UserService {
     private final UserMapper userMapper;
 
     // 유저 찾기
-    public UserDTO getUser(Integer userId) {
+    public UserDTO getUserByUserId(Integer userId) {
         return userMapper.findUserByUserId(userId);
+    }
+
+    // 유저 찾기
+    public UserDTO getUserByEmail(String email) {
+        Optional<UserDTO> userByEmail = getOptionalUserByEmail(email);
+        return userByEmail.orElse(null);
     }
 
     // 회원정보 수정
@@ -33,7 +39,7 @@ public class UserService {
         return userMapper.existsUserByEmail(email);
     }
 
-    public Optional<UserDTO> getUserByEmail(String email) {
+    public Optional<UserDTO> getOptionalUserByEmail(String email) {
         return userMapper.getUserByEmail(email);
     }
 
@@ -45,5 +51,17 @@ public class UserService {
     // 실제 있는 userId인지 확인
     public boolean checkUserIdExists(int userId) {
         return userMapper.existsUserByUserId(userId);
+    }
+
+    // 로그인
+    public UserDTO login(UserDTO user) {
+        Optional<UserDTO> userByEmail = getOptionalUserByEmail(user.getEmail());
+        if (userByEmail.isPresent()) {
+            // 이메일로 조회했을 때, 결과가 있다면
+            return userByEmail.get();
+        } else {
+            // 조회결과가 없으면 리턴하지 않음
+            return null;
+        }
     }
 }

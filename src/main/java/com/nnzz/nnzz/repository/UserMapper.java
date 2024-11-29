@@ -22,6 +22,6 @@ public interface UserMapper {
     UserDTO findUserByEmail(String email);
     UserDTO findUserByLoginId(String loginId);
 
-    @Select("SELECT FROM users WHERE email=#{email}")
+    @Select("SELECT * FROM users WHERE email=#{email}")
     Optional<UserDTO> getUserByEmail(String email);
 }

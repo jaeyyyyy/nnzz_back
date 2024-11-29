@@ -1,5 +1,6 @@
 package com.nnzz.nnzz.controller;
 
+import com.nnzz.nnzz.dto.LoginRequestDTO;
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.exception.*;
 import com.nnzz.nnzz.service.UserService;
@@ -9,9 +10,14 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Pattern;
@@ -22,6 +28,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
     // 여기에는 냠냠쩝쩝에서 설정가능한 정보를 넣을 예정임
     @Operation(summary = "register user", description = "회원 정보를 db에 저장")
@@ -54,7 +61,9 @@ public class UserController {
             // 유효성 검증 실패
             throw new InvalidValueException(user.getNickname());
         } else {
+            // 조건 충족하면 회원가입시키고 로그인함
             userService.registerUser(user);
+            userService.login(user);
             return ResponseEntity.ok("사용자가 성공적으로 추가되었습니다.");
         }
     }
@@ -135,6 +144,49 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("중복된 닉네임입니다.");
         } else {
             return ResponseEntity.ok("사용가능한 닉네임입니다.");
+        }
+    }
+
+
+    @Operation(summary = "login user", description = "회원 로그인")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "로그인 완료 완료"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "회원 이메일", required = true),
+    })
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
+        String email = loginRequest.getEmail();
+
+        if (email != null) {
+            // 이메일 값이 비어있지 않은 경우에만
+            UserDTO loginUser = userService.getUserByEmail(email);
+
+            if(loginUser != null) {
+                // 로그인 성공
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(email, null)
+                );
+                Object principal = authentication.getPrincipal();
+
+                String username;
+
+                // 유저 확인 테스트
+                if (principal instanceof UserDetails) {
+                    username = ((UserDetails) principal).getUsername();
+                } else {
+                    username = principal.toString();
+                }
+                return ResponseEntity.ok("로그인 성공 : " + username);
+            } else {
+                throw new UserNotExistsException(email);
+            }
+        } else {
+            throw new UserNotExistsException("[null]");
         }
     }
 }

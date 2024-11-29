@@ -4,28 +4,6 @@ spring:
   profiles:
     active: prod
 
-  security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            client-id: ${client-id}
-            client-secret: ${client-secret}
-            client-authentication-method: post
-            authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/auth/login
-            ## 서버에서 인증을 마치고 돌아가는 callback uri
-            scope:
-              - account_email
-            client-name: Kakao
-        provider:
-          kakao:
-            authorization-uri: https://kauth.kakao.com/oauth/authorize
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-            user-name-attribute: id
-
-
   graphql:
     cors:
       allowed-headers: "*"
@@ -34,6 +12,9 @@ spring:
       allowed-origins:
         - https://www.nnzz.today
         - http://localhost:3000
+  mvc:
+    problemdetails:
+      enabled: true #problemDetails 사용설정
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.nnzz.nnzz.dto

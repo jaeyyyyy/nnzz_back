@@ -2,6 +2,7 @@ package com.nnzz.nnzz.repository;
 
 import com.nnzz.nnzz.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.Optional;
 
@@ -20,4 +21,7 @@ public interface UserMapper {
     UserDTO findUserByUserId(int userId);
     UserDTO findUserByEmail(String email);
     UserDTO findUserByLoginId(String loginId);
+
+    @Select("SELECT FROM users WHERE email=#{email}")
+    Optional<UserDTO> getUserByEmail(String email);
 }

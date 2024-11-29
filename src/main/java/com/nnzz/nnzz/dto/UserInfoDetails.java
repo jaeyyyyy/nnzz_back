@@ -1,21 +1,16 @@
-package com.nnzz.nnzz.oauth;
+package com.nnzz.nnzz.dto;
 
-import com.nnzz.nnzz.dto.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
-public class OauthUserDetails implements UserDetails {
-
+public class UserInfoDetails implements UserDetails {
     private final UserDTO user;
-    private final Map<String, Object> attributes;
 
-    public OauthUserDetails(UserDTO user, Map<String, Object> attributes) {
+    public UserInfoDetails(UserDTO user) {
         this.user = user;
-        this.attributes = attributes;
     }
 
     public Integer getUserId() {
@@ -71,7 +66,6 @@ public class OauthUserDetails implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
 
     // 계정이 활성화(사용가능)인지 (true:활성화)
     @Override

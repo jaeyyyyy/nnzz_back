@@ -19,8 +19,6 @@ configurations {
 	}
 }
 
-extra["springCloudVersion"] = "2023.0.3"
-
 repositories {
 	mavenCentral()
 }
@@ -45,21 +43,12 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	//oauth
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+	// implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	testImplementation("org.springframework.security:spring-security-test")
 
 	// jwt
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
-
-	// feignClient
-	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-}
-
-dependencyManagement {
-	imports {
-		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-	}
 }
 
 tasks.withType<Test> {

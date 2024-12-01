@@ -4,6 +4,7 @@ import com.nnzz.nnzz.dto.BroadcastDTO;
 import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
+import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.repository.FindStoreMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,7 @@ public class FindStoreService {
     private String getCurrentDayOfWeek(String dateString) {
         // SimpleDateFormat을 사용하여 문자열을 Date로 변환
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false); // 엄격한 날짜 형식 검사를 활성화
         try {
             Date date = dateFormat.parse(dateString);
 
@@ -83,8 +85,7 @@ public class FindStoreService {
             System.out.println("요일 : " + days[calendar.get(Calendar.DAY_OF_WEEK)]);
             return days[calendar.get(Calendar.DAY_OF_WEEK)];
         } catch(ParseException e) {
-            e.printStackTrace();
-            return null;
+            throw new InvalidValueException(dateString);
         }
     }
 

@@ -24,4 +24,10 @@ public interface UserMapper {
 
     @Select("SELECT * FROM users WHERE email=#{email}")
     Optional<UserDTO> getUserByEmail(String email);
+
+    @Select("SELECT * FROM users WHERE user_id=#{userId}")
+    Optional<UserDTO> getUserByUserId(int userId);
+
+    @Select("DELETE FROM users WHERE user_id=#{userId}")
+    void deleteUserByUserId(int userId);
 }

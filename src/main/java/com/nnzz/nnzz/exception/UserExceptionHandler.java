@@ -46,7 +46,7 @@ public class UserExceptionHandler {
         return createProblemDetail(HttpStatus.CONFLICT, "닉네임이 중복됩니다.", ex.getMessage());
     }
 
-    // 경로의 id와 본문의 id가 일치하지 않음
+    // 두 값이 일치하지 않음
     @ExceptionHandler(InconsistentException.class)
     public ProblemDetail handleInconsistentException(InconsistentException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "아이디가 일치하지 않습니다.", ex.getMessage());
@@ -56,6 +56,12 @@ public class UserExceptionHandler {
     @ExceptionHandler(InvalidValueException.class)
     public ProblemDetail handleInvalidValueException(InvalidValueException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "유효한 값이 아닙니다.", ex.getMessage());
+    }
+
+    // 인증되지 않은 유저
+    @ExceptionHandler(UnauthorizedException.class)
+    public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
+        return createProblemDetail(HttpStatus.UNAUTHORIZED, "인증되지 않은 유저입니다.", ex.getMessage());
     }
 
 }

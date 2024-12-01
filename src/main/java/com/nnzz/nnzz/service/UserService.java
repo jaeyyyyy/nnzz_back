@@ -1,15 +1,18 @@
 package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.dto.*;
+import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserMapper userMapper;
 
@@ -25,11 +28,13 @@ public class UserService {
     }
 
     // 회원정보 수정
+    @Transactional
     public void updateUser(UserDTO user){
         userMapper.updateUser(user);
     }
 
     // 회원가입 처리
+    @Transactional
     public void registerUser(UserDTO user) {
         userMapper.createUser(user);
     }
@@ -42,6 +47,11 @@ public class UserService {
     public Optional<UserDTO> getOptionalUserByEmail(String email) {
         return userMapper.getUserByEmail(email);
     }
+
+    public Optional<UserDTO> getOptionalUserByUserId(Integer userId) {
+        return userMapper.getUserByUserId(userId);
+    }
+
 
     // 닉네임 중복 찾기
     public boolean checkNicknameExists(String nickname) {
@@ -63,5 +73,15 @@ public class UserService {
             // 조회결과가 없으면 리턴하지 않음
             return null;
         }
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void deleteUser(Integer userId) {
+        // 사용자 찾기
+        UserDTO userByUserId = getOptionalUserByUserId(userId)
+                .orElseThrow(() -> new UserNotExistsException(userId));
+        // 사용자 삭제
+        userMapper.deleteUserByUserId(userId);
     }
 }

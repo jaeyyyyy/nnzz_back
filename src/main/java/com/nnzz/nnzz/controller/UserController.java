@@ -1,7 +1,10 @@
 package com.nnzz.nnzz.controller;
 
+import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.LoginRequestDTO;
+import com.nnzz.nnzz.dto.UpdateUserDTO;
 import com.nnzz.nnzz.dto.UserDTO;
+import com.nnzz.nnzz.dto.UserInfoDetails;
 import com.nnzz.nnzz.exception.*;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Pattern;
@@ -69,56 +74,59 @@ public class UserController {
     }
 
     // 회원 정보 업데이트
-    @Operation(summary = "update user", description = "회원정보를 db에 업데이트")
+    @Operation(summary = "update user", description = "회원정보를 db에 업데이트, (2024-12-01) 로그인 된 유저 정보를 받아오는 것으로 수정 / 수정할 값(닉네임,프로필이미지,성별,나이대)만 보내주시면 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "경로의 회원 pk(userId)와 본문의 회원 pk가 일치하지 않음, 올바르지 않은 형식의 닉네임"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
-            @ApiResponse(responseCode = "403", description = "다른 유저의 정보를 변경하는 등 권한이 없는 경우"),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저"),
-            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임 또는 존재하지 않는 유저"),
+            @ApiResponse(responseCode = "404", description = "적절하지 않은 닉네임 값"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
-            @Parameter(name = "userId", description = "회원 pk(userId, 자동증가 Integer 형태)", required = true),
             @Parameter(name = "nickname", description = "닉네임", required = true),
             @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true),
             @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
     })
-    @PatchMapping("/update/{userId}")
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @PathVariable Integer userId) {
+    @PatchMapping("/update")
+    @Transactional
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDTO updateUser) {
+        // Authentication에서 가져온 유저 정보
+        UserDTO authUser = SecurityUtils.getCurrentUser();
 
-        // 요청 본문에서 가져온 닉네임
-        String nickname = user.getNickname();
-        // 요청 본문에서 가져온 userId
-        Integer requestUserId = user.getUserId();
+        if(authUser == null) {
+            throw new UnauthorizedException("인증되지 않은 유저입니다.");
+        } else {
+            // AuthUser에서 가져온 userId
+            Integer authUserId = authUser.getUserId();
+            // 요청 본문에서 가져온 닉네임
+            String nickname = updateUser.getNickname();
 
-        // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
-        boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
+            // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
+            boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
+            if(!invalidTest) {
+                // 유효한 닉네임인지 먼저 확인
+                throw new InvalidValueException(nickname);
+            }
 
-
-        if(!userId.equals(requestUserId)) {
-            // 경로와 요청의 userId가 일치하지 않음
-            throw new InconsistentException(userId, requestUserId);
-        }
-
-        if(!invalidTest) {
-            // 유효한 닉네임인지 먼저 확인
-            throw new InvalidValueException(user.getNickname());
-        }
-
-        // 존재하는 회원인지 확인한다.
-        if(userService.checkUserIdExists(userId)) {
             // 이미 사용중인 닉네임인지 확인한다
             if(userService.checkNicknameExists(nickname)){
-                throw new NicknameDuplicateException(user.getNickname());
+                throw new NicknameDuplicateException(nickname);
             }
+
+            // UserDTO 객체를 빌더를 사용하여 생성하여 업데이트
+            UserDTO userToUpdate = UserDTO.builder()
+                    .userId(authUserId) // 인증된 사용자 ID
+                    .email(authUser.getEmail()) // 이메일은 수정 불가하므로 기존 이메일 사용
+                    .nickname(updateUser.getNickname())
+                    .profileImage(updateUser.getProfileImage())
+                    .gender(updateUser.getGender())
+                    .ageRange(updateUser.getAgeRange())
+                    .build();
+
             // 이 아니면 업데이트
-            userService.updateUser(user);
+            userService.updateUser(userToUpdate);
             return ResponseEntity.ok("사용자가 성공적으로 업데이트되었습니다.");
-        } else {
-            throw new UserNotExistsException(userId);
         }
     }
 
@@ -162,8 +170,9 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         String email = loginRequest.getEmail();
 
+        // 이메일 값이 비어있지 않은 경우에만
         if (email != null) {
-            // 이메일 값이 비어있지 않은 경우에만
+            // 해당 이메일을 가진 유저가 있는지 확인
             UserDTO loginUser = userService.getUserByEmail(email);
 
             if(loginUser != null) {
@@ -176,8 +185,8 @@ public class UserController {
                 String username;
 
                 // 유저 확인 테스트
-                if (principal instanceof UserDetails) {
-                    username = ((UserDetails) principal).getUsername();
+                if (principal instanceof UserInfoDetails) {
+                    username = ((UserInfoDetails) principal).getUsername();
                 } else {
                     username = principal.toString();
                 }
@@ -188,5 +197,42 @@ public class UserController {
         } else {
             throw new UserNotExistsException("[null]");
         }
+    }
+
+    @Operation(summary = "delete user", description = "회원 탈퇴")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "로그인 완료 완료"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "회원 이메일", required = true),
+    })
+    // 회원 탈퇴
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser() {
+        Integer userId = SecurityUtils.getUserId();
+
+        if(userId != null) {
+            try {
+                userService.deleteUser(userId);
+                return ResponseEntity.ok("회원 탈퇴 성공");
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("알수 없는 오류입니다.");
+            }
+        } else {
+            throw new UserNotExistsException("[null]");
+        }
+    }
+
+    // 유저의 정보를 가져오기
+    @GetMapping
+    public ResponseEntity<?> getUsers() {
+        UserDTO authUser = SecurityUtils.getCurrentUser();
+        if (authUser == null) {
+            throw new UserNotExistsException("[null]"); // 인증되지 않은 경우
+        }
+        return ResponseEntity.ok(authUser); // 성공적으로 유저 정보를 반환
     }
 }

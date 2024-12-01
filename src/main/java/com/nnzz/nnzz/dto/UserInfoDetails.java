@@ -5,12 +5,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserInfoDetails implements UserDetails {
     private final UserDTO user;
 
     public UserInfoDetails(UserDTO user) {
         this.user = user;
+    }
+
+    // 모든 사용자 정보를 반환하는 메서드
+    public UserDTO getUserInfo() {
+        return user;
     }
 
     public Integer getUserId() {

@@ -8,7 +8,7 @@ public class InconsistentException extends RuntimeException {
     private final Integer bodyId;
 
     public InconsistentException(final Integer userId, final Integer bodyId) {
-        super(userId + "와 " + bodyId + " 가 일치하지 않습니다.");
+        super("userId 값 : " + userId + "와 " + bodyId + " 가 일치하지 않습니다.");
         this.userId = userId;
         this.bodyId = bodyId;
     }

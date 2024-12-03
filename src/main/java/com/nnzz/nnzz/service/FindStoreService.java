@@ -6,24 +6,44 @@ import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
 import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.repository.FindStoreMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FindStoreService {
     private final FindStoreMapper findStoreMapper;
 
-    @Autowired
-    public FindStoreService(FindStoreMapper findStoreMapper) {
-        this.findStoreMapper = findStoreMapper;
+    // 날짜 가져오기
+    private String getCurrentDayOfWeek(String dateString) throws DateTimeParseException {
+        // SimpleDateFormat을 사용하여 문자열을 Date로 변환
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false); // 엄격한 날짜 형식 검사를 활성화
+        try {
+            Date date = dateFormat.parse(dateString);
+
+            // Date를 Calendar로 변환
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            String[] days = {"", "sun", "mon", "tue", "wed", "thu", "fri", "sat"};
+
+            System.out.println("요일 : " + days[calendar.get(Calendar.DAY_OF_WEEK)]);
+            return days[calendar.get(Calendar.DAY_OF_WEEK)];
+        } catch(ParseException e) {
+            throw new DateTimeParseException("날짜 : " + dateString +"유효하지 않은 날짜 형식입니다.", dateString, 0);
+        }
     }
+
 
     // 1. 현재 선택 가능한 카테고리를 가져오기
     // 점심 가능 카테고리 가져오기
@@ -66,27 +86,6 @@ public class FindStoreService {
         // 3단계 : 최종적으로 category 가져오기
         List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
         return validCategories;
-    }
-
-    // 날짜 가져오기
-    private String getCurrentDayOfWeek(String dateString) {
-        // SimpleDateFormat을 사용하여 문자열을 Date로 변환
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        dateFormat.setLenient(false); // 엄격한 날짜 형식 검사를 활성화
-        try {
-            Date date = dateFormat.parse(dateString);
-
-            // Date를 Calendar로 변환
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-
-            String[] days = {"", "sun", "mon", "tue", "wed", "thu", "fri", "sat"};
-
-            System.out.println("요일 : " + days[calendar.get(Calendar.DAY_OF_WEEK)]);
-            return days[calendar.get(Calendar.DAY_OF_WEEK)];
-        } catch(ParseException e) {
-            throw new InvalidValueException(dateString);
-        }
     }
 
     // 2. 가능한 가게 store_id를 가져오기

@@ -5,17 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
-@Builder
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaveCardDTO {
-    private Integer cardId;
-    private Integer userId;
-    private String storeId;
+public class FoodTypeDTO {
     private Integer foodTypeId;
-    private LocalDate cardDate;
-    private String mealtime;
+    private String category;
+    private String description;
 }

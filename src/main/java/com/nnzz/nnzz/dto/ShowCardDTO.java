@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 
 @Builder
@@ -14,11 +16,9 @@ import java.util.List;
 public class ShowCardDTO {
     private Integer cardId;
     private Integer userId;
-    private String storeId;
-    private Integer foodTypeId;
-    private String name; // 가게 이름
-    private String address; // 가게 주소
-    private String category;
-    private List<MenuDTO> menus; // 메뉴 정보
-    private String date; // 날짜 정보
+    List<FoodTypeDTO> foodTypes; // 카테고리 관련
+    List<CardStoreDTO> stores; // 가게 관련
+    private LocalDate cardDate; // 날짜 정보
+    private String mealtime; // 점심, 저녁
+    private Timestamp createdAt; // 생성한 날짜
 }

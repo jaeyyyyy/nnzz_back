@@ -14,10 +14,10 @@
     </select>
 
 
-    <!--유저가 최종선택한 음식을 db에 저장하고 cardId 반환하기-->
+    <!--유저가 최종선택한 음식과 날짜를 db에 저장하고 cardId 반환하기-->
     <insert id="createCard" parameterType="SaveCardDTO" useGeneratedKeys="true" keyProperty="cardId">
-        INSERT INTO card(user_id, store_id, food_type_id)
-        VALUES (#{userId}, #{storeId}, #{foodTypeId})
+        INSERT INTO card(user_id, store_id, food_type_id, card_date, mealtime)
+        VALUES (#{userId}, #{storeId}, #{foodTypeId}, #{cardDate}, #{mealtime})
     </insert>
 
     <!--카드 소개문구 가져오기-->
@@ -42,12 +42,20 @@
     <resultMap id="CardResultMap" type="ShowCardDTO">
         <result property="cardId" column="card_id"/>
         <result property="userId" column="user_id"/>
-        <result property="storeId" column="store_id"/>
-        <result property="foodTypeId" column="food_type_id"/>
-        <result property="name" column="name"/>
-        <result property="address" column="address"/>
-        <result property="category" column="category"/>
-        <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+        <result property="cardDate" column="card_date"/>
+        <result property="mealtime" column="mealtime"/>
+        <result property="createdAt" column="created_at"/>
+        <collection property="stores" ofType="CardStoreDTO">
+            <id property="storeId" column="store_id"/>
+            <id property="name" column="name"/>
+            <id property="address" column="address"/>
+            <id property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+        </collection>
+        <collection property="foodTypes" ofType="FoodTypeDTO">
+            <id property="foodTypeId" column="food_type_id"/>
+            <id property="category" column="category"/>
+            <id property="description" column="description"/>
+        </collection>
     </resultMap>
     <select id="getCardFullInfo" resultMap="CardResultMap">
         <![CDATA[
@@ -69,11 +77,15 @@
         SELECT
             c.card_id,
             c.user_id,
-            c.food_type_id,
             s.store_id,
+            c.food_type_id,
+            ft.type1 AS category,
+            ft.description,
             s.name AS name,
             s.address AS address,
-            ft.type1 AS category,
+            c.card_date,
+            c.mealtime,
+            c.created_at,
             CASE
                 WHEN mc.cnt >= 3 THEN
                     COALESCE(jsonb_agg(
@@ -101,7 +113,8 @@
         WHERE
             c.card_id = #{cardId}
         GROUP BY
-            c.card_id, c.user_id, c.food_type_id, s.store_id, s.name, s.address, ft.type1, mc.cnt;
+            c.card_id, c.user_id, s.store_id, s.name, s.address, mc.cnt, c.food_type_id, ft.type1, ft.description, c.card_date,
+            c.mealtime, c.created_at
         ]]>
     </select>
 </mapper>

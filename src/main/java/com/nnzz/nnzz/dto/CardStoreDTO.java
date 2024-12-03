@@ -1,21 +1,20 @@
 package com.nnzz.nnzz.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaveCardDTO {
-    private Integer cardId;
-    private Integer userId;
+public class CardStoreDTO {
     private String storeId;
-    private Integer foodTypeId;
-    private LocalDate cardDate;
-    private String mealtime;
+    private String name;
+    private String address;
+    private List<MenuDTO> menus; // 메뉴 정보
 }

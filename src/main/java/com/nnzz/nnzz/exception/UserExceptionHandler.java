@@ -1,6 +1,7 @@
 package com.nnzz.nnzz.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -64,4 +65,9 @@ public class UserExceptionHandler {
         return createProblemDetail(HttpStatus.UNAUTHORIZED, "인증되지 않은 유저입니다.", ex.getMessage());
     }
 
+    // 오픈되지 않은 지역
+    @ExceptionHandler(InvalidLocationException.class)
+    public ProblemDetail handleInvalidLocationException(InvalidLocationException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "오픈되지 않은 지역입니다.", ex.getMessage());
+    }
 }

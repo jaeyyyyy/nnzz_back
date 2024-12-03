@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestDTO {
+public class FindStoreRequestDTO {
     private double lat;
     private double lng;
     private String day;

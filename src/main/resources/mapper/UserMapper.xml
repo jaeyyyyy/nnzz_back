@@ -34,7 +34,17 @@
     <!--유저 정보 수정-->
     <update id="updateUser" parameterType="UserDTO">
         UPDATE users
-        SET nickname = #{nickname}, profile_image = #{profileImage}, gender = #{gender}, age_range = #{ageRange}
+        SET
+            nickname = #{nickname},
+            profile_image = #{profileImage},
+            gender = #{gender},
+            age_range = #{ageRange},
+            last_nickname_change_date =
+                CASE
+                    WHEN #{nickname} != (SELECT nickname FROM users WHERE user_id = #{userId})
+                        THEN NOW()
+                    ELSE last_nickname_change_date
+                    END
         WHERE user_id = #{userId}
     </update>
 
@@ -53,6 +63,9 @@
             SELECT 1
             FROM users
             WHERE nickname = #{nickname}
+        <if test="userId != null">
+            AND user_id != #{userId}
+        </if>
         )
     </select>
 

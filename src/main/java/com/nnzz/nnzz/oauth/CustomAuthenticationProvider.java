@@ -1,6 +1,8 @@
 package com.nnzz.nnzz.oauth;
 
+import com.nnzz.nnzz.config.jasypt.Seed;
 import com.nnzz.nnzz.dto.UserInfoDetails;
+import com.nnzz.nnzz.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,18 +17,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final Seed seed;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName(); // 이메일
+        String encryptedEmail = seed.encrypt(email); // 이메일 암호화
 
         // UserDetailsService를 통해 사용자 정보 조회
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        UserInfoDetails userInfoDetails = customUserDetailsService.loadUserByUsername(encryptedEmail); // 암호화된 이메일로 사용자 조회
 
-        if (userDetails != null) {
+        if (userInfoDetails != null) {
             // 인증 성공 시 Authentication 객체 생성
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userInfoDetails, null, userInfoDetails.getAuthorities());
         } else {
             throw new AuthenticationException("인증 실패: 사용자 정보가 잘못되었습니다.") {};
         }

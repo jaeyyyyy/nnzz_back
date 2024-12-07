@@ -53,7 +53,7 @@ public class FindStoreController {
     }
 
 
-    @Operation(summary = "get lunch categories", description = "직선거리 750m 내에 점심 영업중인 가게들의 카테고리 찾기")
+    @Operation(summary = "get lunch categories", description = "<strong>\uD83D\uDCA1카드액션 시작시 영업중인 점심 카드 가져오기</strong><br>(직선거리 750m 내에 점심 영업중인 가게들의 카테고리 찾기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
             @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역"),
@@ -66,6 +66,7 @@ public class FindStoreController {
     })
     @GetMapping("/lunch/category")
     public ResponseEntity<List<CategoryDTO>> getLunchCategories(@RequestParam Double lng, @RequestParam Double lat, @RequestParam String day) {
+
         for(double[] station : STATIONS) {
             if(isWithinStation(lat, lng, station[0], station[1])) {
                 List<CategoryDTO> category = findStoreService.getLunchCategoriesByLocation(lat, lng, day);
@@ -75,7 +76,7 @@ public class FindStoreController {
         throw new InvalidLocationException(lat, lng);
     }
 
-    @Operation(summary = "get dinner categories", description = "직선거리 750m 내에 저녁 영업중인 가게들의 카테고리 찾기")
+    @Operation(summary = "get dinner categories", description = "<strong>\uD83D\uDCA1카드액션 시작시 영업중인 저녁 카드 가져오기</strong><br>(직선거리 750m 내에 저녁 영업중인 가게들의 카테고리 찾기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
             @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역"),
@@ -97,7 +98,8 @@ public class FindStoreController {
         throw new InvalidLocationException(lat, lng);
     }
 
-    @Operation(summary = "get lunch 750", description = "get lunch/dinner (거리값) api들은 categoryList(배열)을 파라미터로 필요로 해서 GET 방식이 아닌 POST 방식을 사용함. \n 직선거리 750m 내에 점심 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get lunch 750",
+            description = "<strong>\uD83D\uDCA1카드액션 선택이 끝난 후 점심 식당 정보 보러가기(디폴트 값 = 750m)</strong><br>get lunch/dinner (거리값) api들은 categoryList(배열)을 파라미터로 필요로 해서 GET 방식이 아닌 POST 방식을 사용함.<br>직선거리 750m 내에 점심 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -117,7 +119,7 @@ public class FindStoreController {
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get dinner 750", description = "직선거리 750m 내에 저녁 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get dinner 750", description = "<strong>\uD83D\uDCA1카드액션 선택이 끝난 후 저녁 식당 정보 보러가기(디폴트 값 = 750m)</strong><br>직선거리 750m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -147,7 +149,7 @@ public class FindStoreController {
     }
 
 
-    @Operation(summary = "get lunch 500", description = "직선거리 500m 내에 점심 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get lunch 500", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 500m로 바꿀 경우(점심)</strong><br>직선거리 500m 내에 점심 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -167,7 +169,7 @@ public class FindStoreController {
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get dinner 500", description = "직선거리 500m 내에 저녁 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get dinner 500", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 500m로 바꿀 경우(저녁)</strong><br>직선거리 500m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -187,7 +189,7 @@ public class FindStoreController {
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get lunch 250", description = "직선거리 250m 내에 점심 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get lunch 250", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 250m로 바꿀 경우(점심)</strong><br>직선거리 250m 내에 점심 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -207,7 +209,7 @@ public class FindStoreController {
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get dinner 250", description = "직선거리 250m 내에 저녁 영업중인 가게들의 리스트 찾기")
+    @Operation(summary = "get dinner 250", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 250m로 바꿀 경우(저녁)</strong><br>직선거리 250m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
@@ -227,7 +229,7 @@ public class FindStoreController {
         return ResponseEntity.ok(storeDetails);
     }
 
-    @Operation(summary = "get one store detail", description = "가게 1곳의 정보를 가져오기")
+    @Operation(summary = "get one store detail", description = "<strong>\uD83D\uDCA1결과표기 화면에서 특정 가게 1곳 클릭할 경우</strong><br>가게 1곳의 정보를 가져오기")
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),

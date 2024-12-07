@@ -251,6 +251,8 @@
         <result property="storeId" column="store_id"/>
         <result property="name" column="name"/>
         <result property="address" column="address"/>
+        <result property="lat" column="lat"/>
+        <result property="lng" column="lng"/>
         <result property="distance" column="distance"/>
         <result property="category" column="category"/>
         <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
@@ -277,6 +279,8 @@
             s.store_id,
             s.name,
             s.address,
+            ST_Y(s.location) as lat,
+            ST_X(s.location) as lng,
             ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS original_distance,
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
@@ -339,6 +343,8 @@
         <result property="storeId" column="store_id"/>
         <result property="name" column="name"/>
         <result property="address" column="address"/>
+        <result property="lat" column="lat"/>
+        <result property="lng" column="lng"/>
         <result property="distance" column="distance"/>
         <result property="category" column="category"/>
         <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
@@ -365,6 +371,8 @@
             s.store_id,
             s.name,
             s.address,
+            ST_Y(s.location) as lat,
+            ST_X(s.location) as lng,
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
             CASE

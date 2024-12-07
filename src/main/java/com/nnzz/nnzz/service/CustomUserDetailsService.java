@@ -15,8 +15,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService; // 사용자 정보를 조회하는 서비스
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserDTO user = userService.getUserByEmail(email);
+    public UserInfoDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserDTO user = userService.getOptionalUserByEmail(email).orElse(null);
         if (user == null) {
             throw new UsernameNotFoundException("사용자가 존재하지 않습니다: " + email);
         }

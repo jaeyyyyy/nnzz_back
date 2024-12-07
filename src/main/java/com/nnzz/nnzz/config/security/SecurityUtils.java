@@ -2,6 +2,7 @@ package com.nnzz.nnzz.config.security;
 
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.dto.UserInfoDetails;
+import com.nnzz.nnzz.exception.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -11,9 +12,14 @@ public class SecurityUtils {
 
     public static UserDTO getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return null;
+
+        if (auth == null) {
+            throw new UnauthorizedException("인증 세션이 존재하지 않습니다."); // 세션 없음
         }
+        if (!auth.isAuthenticated()) {
+            throw new UnauthorizedException("로그인 세션이 만료되었습니다."); // 세션 만료
+        }
+
         Object principal = auth.getPrincipal();
 
         if (principal instanceof UserInfoDetails) {
@@ -25,9 +31,11 @@ public class SecurityUtils {
 
     public static Integer getUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if(auth == null || !auth.isAuthenticated()) {
-            return null;
+        if (auth == null) {
+            throw new UnauthorizedException("인증 세션이 존재하지 않습니다."); // 세션 없음
+        }
+        if (!auth.isAuthenticated()) {
+            throw new UnauthorizedException("로그인 세션이 만료되었습니다."); // 세션 만료
         }
 
         Object principal = auth.getPrincipal();
@@ -40,13 +48,15 @@ public class SecurityUtils {
     }
 
     public static String getUserEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if(authentication == null || !authentication.isAuthenticated()) {
-            return "anonymous";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            throw new UnauthorizedException("인증 세션이 존재하지 않습니다."); // 세션 없음
+        }
+        if (!auth.isAuthenticated()) {
+            throw new UnauthorizedException("로그인 세션이 만료되었습니다."); // 세션 만료
         }
 
-        Object principal = authentication.getPrincipal();
+        Object principal = auth.getPrincipal();
         if(principal instanceof UserInfoDetails) {
             return String.valueOf(((UserInfoDetails)principal).getUsername());
         } else {

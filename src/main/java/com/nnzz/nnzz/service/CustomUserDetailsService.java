@@ -3,8 +3,6 @@ package com.nnzz.nnzz.service;
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.dto.UserInfoDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

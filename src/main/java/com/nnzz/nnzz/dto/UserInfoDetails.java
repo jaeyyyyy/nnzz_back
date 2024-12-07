@@ -5,8 +5,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class UserInfoDetails implements UserDetails {
     private final UserDTO user;

@@ -1,4 +1,4 @@
-package com.nnzz.nnzz.config.jasypt;
+package com.nnzz.nnzz.config.seed;
 
 /**
 @file KISA_SEED_CBC.java

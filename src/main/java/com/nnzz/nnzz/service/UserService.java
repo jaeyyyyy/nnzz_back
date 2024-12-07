@@ -1,8 +1,7 @@
 package com.nnzz.nnzz.service;
 
-import com.nnzz.nnzz.config.jasypt.Seed;
+import com.nnzz.nnzz.config.seed.Seed;
 import com.nnzz.nnzz.dto.*;
-import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.UserMapper;
@@ -10,11 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 

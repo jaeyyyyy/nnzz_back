@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Tag(name="find stores", description = "음식점 찾기 API / (2024-11-27) 일부 API의 매핑 방식을 변경하고, 변수명을 수정")
@@ -138,13 +137,8 @@ public class FindStoreController {
 
         List<String> storeIds = findStoreService.get750NearbyDinnerStoreIds(lat, lng, day, categoryList);
 
-        // for(String storeId : storeIds) {
-        // System.out.println("storeIds 출력 : " + storeId);
-        // }
-        // System.out.println("storeIds는 " + storeIds.size() + "개 입니다.");
-
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
-        // System.out.println("storeDetails는 " + storeDetails.size() + "개 입니다.");
+
         return ResponseEntity.ok(storeDetails);
     }
 
@@ -165,7 +159,7 @@ public class FindStoreController {
 
         List<String> storeIds = findStoreService.get500NearbyLunchStoreIds(lat, lng, day, categoryList);
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
-        // System.out.println(storeDetails.size() + "개 입니다.");
+
         return ResponseEntity.ok(storeDetails);
     }
 
@@ -185,7 +179,7 @@ public class FindStoreController {
         List<String> storeIds = findStoreService.get500NearbyDinnerStoreIds(lat, lng, day, categoryList);
 
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
-        // System.out.println(storeDetails.size() + "개 입니다.");
+
         return ResponseEntity.ok(storeDetails);
     }
 
@@ -205,7 +199,7 @@ public class FindStoreController {
         List<String> storeIds = findStoreService.get250NearbyLunchStoreIds(lat, lng, day, categoryList);
 
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
-        // System.out.println(storeDetails.size() + "개 입니다.");
+
         return ResponseEntity.ok(storeDetails);
     }
 
@@ -225,7 +219,7 @@ public class FindStoreController {
         List<String> storeIds = findStoreService.get250NearbyDinnerStoreIds(lat, lng, day, categoryList);
 
         List<StoreDTO> storeDetails = findStoreService.getFinalStoresWithMenuAndBroadcast(lat, lng, storeIds);
-        // System.out.println(storeDetails.size() + "개 입니다.");
+
         return ResponseEntity.ok(storeDetails);
     }
 

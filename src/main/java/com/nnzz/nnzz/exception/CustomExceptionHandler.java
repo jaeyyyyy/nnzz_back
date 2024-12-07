@@ -25,12 +25,6 @@ public class CustomExceptionHandler {
     @ExceptionHandler(UserNotExistsException.class)
     public ProblemDetail handleUserNotExistsException(UserNotExistsException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "존재하지 않는 유저입니다.", ex.getMessage());
-//        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
-//                HttpStatus.NOT_FOUND, ex.getMessage());
-//        pd.setTitle("존재하지 않는 유저입니다.");
-//        pd.setProperty("timestamp", LocalDateTime.now());
-//        pd.setProperty("message", ex.getMessage());
-//        return pd;
     }
 
     // 이메일 중복(이미 존재하는 유저)

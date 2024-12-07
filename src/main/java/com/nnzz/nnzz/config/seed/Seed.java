@@ -1,11 +1,10 @@
-package com.nnzz.nnzz.config.jasypt;
+package com.nnzz.nnzz.config.seed;
 
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

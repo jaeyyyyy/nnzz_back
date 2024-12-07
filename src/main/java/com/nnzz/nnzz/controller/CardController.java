@@ -66,7 +66,6 @@ public class CardController {
 
         Integer foodTypeId = cardService.getCategory(storeId);
         SaveCardDTO newCard = SaveCardDTO.builder()
-                // .userId(1)
                 .userId(userId) // spring security를 통해서 로그인 한 유저의 id를 가져옴
                 .storeId(storeId)
                 .foodTypeId(foodTypeId)

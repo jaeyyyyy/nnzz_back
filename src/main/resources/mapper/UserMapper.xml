@@ -26,7 +26,7 @@
     </select>
 
     <!--유저 추가-->
-    <insert id="createUser" parameterType="UserDTO">
+    <insert id="createUser" parameterType="UserDTO" useGeneratedKeys="true" keyProperty="userId">
         INSERT INTO users (email, nickname, profile_image, gender, age_range)
         VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange})
     </insert>

@@ -1,11 +1,16 @@
 package com.nnzz.nnzz.service;
 
+import com.nnzz.nnzz.config.jwt.JwtToken;
+import com.nnzz.nnzz.config.jwt.JwtTokenProvider;
 import com.nnzz.nnzz.config.seed.Seed;
 import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +25,30 @@ import java.util.Optional;
 public class UserService {
     private final UserMapper userMapper;
     private final Seed seed;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public JwtToken signIn(String email) {
+        // 1. email을 기반으로 Authentication 객체 생성
+        // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null);
+
+        // 2. 실제 검증. authenticate() 메서드를 통해 요청된 User 에 대한 검증 진행
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+        // 3. 인증 정보를 기반으로 JWT 토큰 생성
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        // 4. accessToken 앞에 "Bearer "를 붙여서 반환
+        String bearerAccessToken = "Bearer " + jwtToken.getAccessToken();
+
+        // 5. 수정된 JwtToken 객체 반환
+        return JwtToken.builder()
+                .accessToken(bearerAccessToken)
+                .refreshToken(jwtToken.getRefreshToken())
+                .build();
+    }
+
 
     // 유저 찾기
     public UserDTO getUserByUserId(Integer userId) {
@@ -67,20 +96,23 @@ public class UserService {
 
     // 회원가입 처리
     @Transactional
-    public void registerUser(UserDTO user) {
-        UserDTO encryptedUser = UserDTO.builder()
-                .email(seed.encrypt(user.getEmail()))
+    public UserDTO registerUser(UserDTO user) {
+        UserDTO savedUser = UserDTO.builder()
+                .email(user.getEmail())
+                //.email(seed.encrypt(user.getEmail()))
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
                 .gender(user.getGender())
                 .ageRange(user.getAgeRange())
                 .build();
-        userMapper.createUser(encryptedUser);
+        userMapper.createUser(savedUser);
+        return savedUser;
     }
 
     // 이메일 중복 찾기
     public boolean checkEmailExists(String email) {
-        return userMapper.existsUserByEmail(seed.encrypt(email));
+        // return userMapper.existsUserByEmail(seed.encrypt(email));
+        return userMapper.existsUserByEmail(email);
     }
 
     public Optional<UserDTO> getOptionalUserByEmail(String email) {
@@ -104,7 +136,8 @@ public class UserService {
 
     // 로그인
     public UserDTO login(UserDTO user) {
-        Optional<UserDTO> userByEmail = getOptionalUserByEmail(seed.encrypt(user.getEmail()));
+        Optional<UserDTO> userByEmail = getOptionalUserByEmail(user.getEmail());
+        // Optional<UserDTO> userByEmail = getOptionalUserByEmail(seed.encrypt(user.getEmail()));
         if (userByEmail.isPresent()) {
             // 이메일로 조회했을 때, 결과가 있다면
             return userByEmail.get();

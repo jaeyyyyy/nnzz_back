@@ -2,8 +2,8 @@ package com.nnzz.nnzz.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -19,6 +19,37 @@ public class CustomExceptionHandler {
         pd.setProperty("message", message);
         return pd;
     }
+
+    // 토큰관련 예외
+//    @ExceptionHandler({SecurityException.class, MalformedJwtException.class})
+//    public ProblemDetail handleSecurityException(SecurityException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "잘못된 jwt 서명입니다", ex.getMessage());
+//    }
+//    @ExceptionHandler(ExpiredJwtException.class)
+//    public ProblemDetail handleExpiredJwtException(ExpiredJwtException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "만료된 jwt 토큰입니다", ex.getMessage());
+//    }
+//    @ExceptionHandler(UnsupportedJwtException.class)
+//    public ProblemDetail handleUnsupportedJwtException(UnsupportedJwtException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "지원되지 않는 jwt 토큰입니다.", ex.getMessage());
+//    }
+//    @ExceptionHandler(SignatureException.class)
+//    public ProblemDetail handleSignatureException(SignatureException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "토큰 서명이 유효하지 않습니다.", ex.getMessage());
+//    }
+//    @ExceptionHandler(BadCredentialsException.class)
+//    public ProblemDetail handleBadCredentialsException(BadCredentialsException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "인증 자격 증명이 유효하지 않습니다.", ex.getMessage());
+//    }
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
+//        return createProblemDetail(HttpStatus.BAD_REQUEST, "JWT 토큰이 잘못되었습니다.", ex.getMessage());
+//    }
+    @ExceptionHandler(RuntimeException.class)
+    public ProblemDetail handleRuntimeException(RuntimeException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "claims.get('auth') == null 이라 발생한 런타임예외임", ex.getMessage());
+    }
+
 
     // 유저
     // 존재하지 않는 유저
@@ -43,7 +74,7 @@ public class CustomExceptionHandler {
     // 닉네임 중복
     @ExceptionHandler(NicknameDuplicateException.class)
     public ProblemDetail handleNicknameException(NicknameDuplicateException ex) {
-        return createProblemDetail(HttpStatus.CONFLICT, "닉네임이 중복됩니다.", ex.getMessage());
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "닉네임이 중복됩니다.", ex.getMessage());
     }
 
     // 회원 수정 시 오류

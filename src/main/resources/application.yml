@@ -3,27 +3,16 @@ spring:
     name: nnzz
   profiles:
     active: prod
-
-  graphql:
-    cors:
-      allowed-headers: "*"
-      allowed-methods: "*"
-      allow-credentials: true
-      allowed-origins:
-        - https://www.nnzz.today
-        - http://localhost:3000
   mvc:
     problemdetails:
       enabled: true #problemDetails 사용설정
 mybatis:
+  config-location: classpath:mybatis-config.xml
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.nnzz.nnzz.dto
-  config-location: classpath:mybatis-config.xml
 
 server:
   servlet:
-    session:
-      timeout: 1440m #24h
     encoding:
       charset: UTF-8
       force: true

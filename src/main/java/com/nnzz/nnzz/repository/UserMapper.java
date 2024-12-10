@@ -2,6 +2,7 @@ package com.nnzz.nnzz.repository;
 
 import com.nnzz.nnzz.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface UserMapper {
 
     boolean existsUserByEmail(String email);
 
-    boolean existsUserByNickname(String nickname, Integer userId);
+    boolean existsUserByNickname(@Param("nickname") String nickname, @Param("userId") Integer userId);
 
     boolean existsUserByUserId(int userId);
 

@@ -33,11 +33,11 @@ public interface FindStoreMapper {
 
     // 가능한 가게 리스트를 반환하기
     // 카테고리와 거리에 해당하는 가게 리스트 반환하기
-    List<String> getStores750NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<String> categories);
+    List<String> getStores750NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<Integer> categories);
 
-    List<String> getStores500NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<String> categories);
+    List<String> getStores500NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<Integer> categories);
 
-    List<String> getStores250NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<String> categories);
+    List<String> getStores250NearbyAndByCategory(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("categories") List<Integer> categories);
 
 
     // 최종 가게 정보 불러오기

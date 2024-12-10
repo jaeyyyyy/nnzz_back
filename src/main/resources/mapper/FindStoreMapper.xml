@@ -119,23 +119,52 @@
 
 
     <!-- 3단계: 최종적으로 category 가져오기 -->
-    <select id="getCategories" resultType="CategoryDTO">
+    <resultMap id="categoryResultMap" type="CategoryDTO">
+        <result property="category" column="category"/>
+        <result property="categoryId" column="food_type_id"/>
+        <result property="distance" column="distance"/>
+        <result property="represent" column="represent"/>
+    </resultMap>
+
+    <select id="getCategories" resultMap="categoryResultMap">
         <![CDATA[
-        SELECT
-            ft.type1 AS category,
-            ft.represent_menu AS represent,
+        WITH StoreFoodTypes AS (
+            SELECT DISTINCT s.category AS store_category,
             FLOOR(MIN(ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)))) AS distance
-        FROM food_type ft
-        JOIN (
-            SELECT DISTINCT s.category, s.location
-            FROM store s
-            WHERE s.store_id IN
+        FROM store s
+        WHERE s.store_id IN
         ]]>
             <foreach item="storeId" collection="storeIds" open="(" separator="," close=")">
                 #{storeId}
             </foreach>
-        ) AS categories ON ft.type2 = categories.category
-        GROUP BY ft.type1, ft.represent_menu
+        <![CDATA[
+            GROUP BY s.category
+        ),
+        RankedFoodTypes AS (
+            SELECT
+                ft.type1 AS category,
+                ft.food_type_id,
+                ft.represent_menu AS represent,
+                ROW_NUMBER() OVER (PARTITION BY ft.type1 ORDER BY ft.food_type_id ASC) AS rn,
+                (
+                    SELECT distance
+                    FROM StoreFoodTypes
+                    WHERE store_category = ft.type2
+                    LIMIT 1
+                ) AS distance
+                FROM food_type ft
+                WHERE ft.type2 IN (SELECT store_category FROM StoreFoodTypes)
+                GROUP BY ft.type1, ft.type2, ft.food_type_id, ft.represent_menu
+        )
+        SELECT
+            category,
+            food_type_id,
+            represent,
+            distance
+        FROM RankedFoodTypes
+        WHERE rn = 1
+        ORDER BY distance
+        ]]>
     </select>
 
 
@@ -146,11 +175,16 @@
         FROM store s
         JOIN food_type f ON s.category = f.type2
         WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 750
-        AND f.type1 IN
+        AND f.type1 IN (
+            SELECT DISTINCT type1
+            FROM food_type ft
+            WHERE ft.food_type_id in
+
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
             #{category}
         </foreach>
+        )
     </select>
 
     <!--500미터 이내의 유저가 선택한 카테고리의 가게id 불러오기-->
@@ -160,11 +194,15 @@
         FROM store s
         JOIN food_type f ON s.category = f.type2
         WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 500
-        AND f.type1 IN
+        AND f.type1 IN (
+            SELECT DISTINCT type1
+            FROM food_type ft
+            WHERE ft.food_type_id in
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
             #{category}
         </foreach>
+        )
     </select>
 
     <!--250미터 이내의 유저가 선택한 카테고리의 가게id 불러오기-->
@@ -174,11 +212,15 @@
         FROM store s
         JOIN food_type f ON s.category = f.type2
         WHERE ST_DistanceSphere(location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) <= 250
-        AND f.type1 IN
+        AND f.type1 IN (
+            SELECT DISTINCT type1
+            FROM food_type ft
+            WHERE ft.food_type_id in
         ]]>
         <foreach item="category" collection="categories" open="(" separator="," close=")">
             #{category}
         </foreach>
+        )
     </select>
 
 
@@ -284,6 +326,7 @@
             ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326)) AS original_distance,
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
+            f.food_type_id as category_id,
         CASE
             WHEN mc.cnt >= 3 THEN
                 COALESCE(jsonb_agg(
@@ -306,7 +349,7 @@
         FROM
             store s
         LEFT JOIN
-            (SELECT st.store_id, f.type1
+            (SELECT st.store_id, f.type1, f.food_type_id
              FROM store st
              JOIN food_type f ON st.category = f.type2
              WHERE st.store_id IN
@@ -332,7 +375,7 @@
         </foreach>
         <![CDATA[
     GROUP BY
-        s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts
+        s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts, f.food_type_id
     ORDER BY
         original_distance
         ]]>
@@ -375,6 +418,7 @@
             ST_X(s.location) as lng,
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
+            f.food_type_id as category_id,
             CASE
                 WHEN mc.cnt >= 3 THEN
                     COALESCE(jsonb_agg(
@@ -397,7 +441,7 @@
         FROM
             store s
                 LEFT JOIN
-            (SELECT st.store_id, f.type1
+            (SELECT st.store_id, f.type1, f.food_type_id
              FROM store st
                       JOIN food_type f ON st.category = f.type2
              WHERE st.store_id = #{storeId}) f ON s.store_id = f.store_id
@@ -412,7 +456,7 @@
         WHERE
             s.store_id = #{storeId}
         GROUP BY
-            s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts
+            s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts, f.food_type_id
         ]]>
     </select>
 </mapper>

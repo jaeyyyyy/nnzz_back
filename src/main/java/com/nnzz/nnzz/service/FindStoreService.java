@@ -4,6 +4,7 @@ import com.nnzz.nnzz.dto.BroadcastDTO;
 import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
+import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.repository.FindStoreMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +39,43 @@ public class FindStoreService {
             throw new DateTimeParseException("날짜 : " + dateString +"유효하지 않은 날짜 형식입니다.", dateString, 0);
         }
     }
+
+    // 점심 랜덤 카테고리 뽑기
+    public CategoryDTO getLunchRandomCategory(double currentLat, double currentLong, String dateString) {
+        List<CategoryDTO> lunchCategories = getLunchCategoriesByLocation(currentLat, currentLong, dateString);
+        // 리스트가 비어있지 않은지 확인
+        if(lunchCategories.isEmpty()) {
+            throw new InvalidValueException("카테고리 리스트가 비어있음");
+        }
+
+        // 랜덤 객체 생성
+        Random random = new Random();
+
+        // 랜덤 인덱스 생성
+        int randomIndex = random.nextInt(lunchCategories.size());
+
+        // 랜덤으로 선택된 CategoryDTO 반환
+        return lunchCategories.get(randomIndex);
+    }
+
+    // 저녁 랜덤 카테고리 뽑기
+    public CategoryDTO getDinnerRandomCategory(double currentLat, double currentLong, String dateString) {
+        List<CategoryDTO> dinnerCategories = getDinnerCategoriesByLocation(currentLat, currentLong, dateString);
+        // 리스트가 비어있지 않은지 확인
+        if(dinnerCategories.isEmpty()) {
+            throw new InvalidValueException("카테고리 리스트가 비어있음");
+        }
+
+        // 랜덤 객체 생성
+        Random random = new Random();
+
+        // 랜덤 인덱스 생성
+        int randomIndex = random.nextInt(dinnerCategories.size());
+
+        // 랜덤으로 선택된 CategoryDTO 반환
+        return dinnerCategories.get(randomIndex);
+    }
+
 
 
     // 1. 현재 선택 가능한 카테고리를 가져오기
@@ -88,7 +123,7 @@ public class FindStoreService {
 
     // 2. 가능한 가게 store_id를 가져오기
     // 750 점심
-    public List<String> get750NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get750NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
 
@@ -105,7 +140,7 @@ public class FindStoreService {
     }
 
     // 750 저녁
-    public List<String> get750NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get750NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
 
@@ -123,7 +158,7 @@ public class FindStoreService {
 
 
     // 500 점심
-    public List<String> get500NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get500NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
 
@@ -132,7 +167,7 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new InvalidValueException("영업중인 가게가 없어염");
         }
         List<String> validLunchStoreIds = findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
 
@@ -140,7 +175,7 @@ public class FindStoreService {
     }
 
     // 500 저녁
-    public List<String> get500NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get500NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
 
@@ -149,7 +184,7 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new InvalidValueException("영업중인 가게가 없어염");
         }
         List<String> validDinnerStoreIds = findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
 
@@ -158,7 +193,7 @@ public class FindStoreService {
 
 
     // 250 점심
-    public List<String> get250NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get250NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
 
@@ -167,7 +202,7 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new InvalidValueException("영업중인 가게가 없어염");
         }
         List<String> validLunchStoreIds = findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
 
@@ -175,7 +210,7 @@ public class FindStoreService {
     }
 
     // 250 저녁
-    public List<String> get250NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<String> categories) {
+    public List<String> get250NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
         // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
         List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
 

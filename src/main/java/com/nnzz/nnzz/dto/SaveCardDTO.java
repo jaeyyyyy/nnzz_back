@@ -12,10 +12,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SaveCardDTO {
-    private Integer cardId;
-    private Integer userId;
+    private int cardId;
+    private int userId;
     private String storeId;
-    private Integer foodTypeId;
+    private int foodTypeId;
     private LocalDate cardDate;
     private String mealtime;
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FoodTypeDTO {
-    private Integer foodTypeId;
+    private int foodTypeId;
     private String category;
     private String description;
 }

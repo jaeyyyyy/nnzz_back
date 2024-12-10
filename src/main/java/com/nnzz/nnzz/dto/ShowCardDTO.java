@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShowCardDTO {
-    private Integer cardId;
-    private Integer userId;
+    private int cardId;
+    private int userId;
     List<FoodTypeDTO> foodTypes; // 카테고리 관련
     List<CardStoreDTO> stores; // 가게 관련
     private LocalDate cardDate; // 날짜 정보

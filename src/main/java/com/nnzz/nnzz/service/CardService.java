@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 public class CardService {
     private final CardMapper cardMapper;
 
-    public Integer getCategory(String storeId){
-        Integer foodTypeId = cardMapper.getSelectStoreCategory(storeId);
+    public int getCategory(String storeId){
+        int foodTypeId = cardMapper.getSelectStoreCategory(storeId);
         System.out.println("Retrieved foodTypeId: " + foodTypeId); // foodTypeId 확인차 추가
         return foodTypeId;
     }
 
-    public Integer createCard(SaveCardDTO newCard) {
+    public int createCard(SaveCardDTO newCard) {
         return cardMapper.createCard(newCard);
     }
 

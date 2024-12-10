@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryDTO {
     private String category;
-    private Integer distance;
+    private int categoryId;
+    private int distance;
     private String represent;
 }

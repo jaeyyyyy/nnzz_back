@@ -30,18 +30,23 @@ import java.util.Map;
 public class CardController {
     private final CardService cardService;
 
-    @Operation(summary = "make card and show card", description = "db에 카드를 저장하고 바로 보여줍니다")
+    /**
+     * 최종선택 가게를 저장하고 보여줌
+     * @param requestBody
+     * @return
+     */
+    @Operation(summary = "make card and show card", description = "<strong>\uD83D\uDCA1유저가 최종선택한 가게를 db에 저장하고 바로 보여줍니다</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "잘못된 형식의 날짜"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
             @Parameter(name = "storeId", description = "String 타입, 최종선택한 가게의 storeId", required = true),
             @Parameter(name = "date", description = "String 타입, (예) yyyy-MM-dd 저녁", required = true)
     })
     @PostMapping("/make")
-    // 카드 추가하고 카드를 바로 보여줍니다.
     public ResponseEntity<ShowCardDTO> makeCard(@RequestBody Map<String, String> requestBody) throws DateTimeParseException {
         Integer userId = SecurityUtils.getUserId();
         if (userId == null) {
@@ -64,7 +69,7 @@ public class CardController {
             throw new DateTimeParseException("날짜 : " + DateInput +"유효하지 않은 날짜 형식입니다.", DateInput, 0);
         }
 
-        Integer foodTypeId = cardService.getCategory(storeId);
+        int foodTypeId = cardService.getCategory(storeId);
         SaveCardDTO newCard = SaveCardDTO.builder()
                 .userId(userId) // spring security를 통해서 로그인 한 유저의 id를 가져옴
                 .storeId(storeId)

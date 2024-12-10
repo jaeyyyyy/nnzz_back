@@ -17,8 +17,9 @@ public class StoreDTO {
     private double lat; // 위도
     private double lng; // 경도
     private String address; // 가게 주소
-    private Integer distance; // 사용자와의 거리
+    private int distance; // 사용자와의 거리
     private String category; // 냠냠쩝쩝 카테고리
+    private int categoryId; // 냠냠쩝쩝 카테고리 아이디
     private List<BroadcastDTO> broadcasts; // 방송 정보
     private List<MenuDTO> menus; // 메뉴 정보
 }

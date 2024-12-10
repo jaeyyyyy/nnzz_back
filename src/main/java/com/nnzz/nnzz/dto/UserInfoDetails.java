@@ -1,6 +1,7 @@
 package com.nnzz.nnzz.dto;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -50,8 +51,10 @@ public class UserInfoDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        return collection;
+        ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+        // 기본적으로 ROLE_USER 권한 부여
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        return authorities;
     }
 
     // 계정이 만료되지 않았는지 (true: 만료x)

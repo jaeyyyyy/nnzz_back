@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- UserLocationMapper.xml -->
+<mapper namespace="com.nnzz.nnzz.repository.UserLocationMapper">
+    <select id="getUserLocations">
+        SELECT
+            location_id,
+            user_id,
+            ST_X(location) as lng,
+            ST_Y(location) as lat,
+            address,
+            building_name,
+            created_at
+        FROM user_locations ul
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="countUserLocations" resultType="int">
+        SELECT COUNT(*)
+        FROM user_locations
+        WHERE user_id = #{userId}
+    </select>
+
+    <delete id="deleteOldestLocation">
+        DELETE FROM user_locations
+        WHERE location_id = (
+            SELECT location_id
+            FROM user_locations
+            WHERE user_id = #{userId}
+            ORDER BY created_at ASC
+            LIMIT 1
+            )
+    </delete>
+
+
+    <insert id="insertUserLocation">
+        INSERT INTO user_locations (user_id, location, address, building_name)
+        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address}, #{buildingName})
+    </insert>
+
+</mapper>

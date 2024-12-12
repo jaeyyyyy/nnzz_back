@@ -37,5 +37,4 @@ out/
 .vscode/
 
 ### SECRET INFO ###
-application-prod.yml
 application-key.properties

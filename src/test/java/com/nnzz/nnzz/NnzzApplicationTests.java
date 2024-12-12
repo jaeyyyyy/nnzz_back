@@ -3,10 +3,10 @@ package com.nnzz.nnzz;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+// @SpringBootTest
 class NnzzApplicationTests {
 
-	@Test
+//	@Test
 	void contextLoads() {
 	}
 

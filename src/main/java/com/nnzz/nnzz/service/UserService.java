@@ -2,10 +2,10 @@ package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.config.jwt.JwtTokenProvider;
-import com.nnzz.nnzz.config.seed.Seed;
 import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
+import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import com.nnzz.nnzz.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -24,9 +26,28 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserMapper userMapper;
-    private final Seed seed;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final BlacklistTokenMapper blacklistTokenMapper;
+
+
+    public Map<String, Object> returnUserResponse(JwtToken jwtToken, UserDTO loginUser) {
+        Map<String, Object> response = new HashMap<>();
+
+        LoginUserDTO loginUserDTO = LoginUserDTO.builder()
+                .id(loginUser.getUserId())
+                .nickname(loginUser.getNickname())
+                .email(loginUser.getEmail())
+                .profileImage(loginUser.getProfileImage())
+                .gender(loginUser.getGender())
+                .age(loginUser.getAgeRange())
+                .build();
+
+        response.put("token", jwtToken);
+        response.put("user", loginUserDTO);
+
+        return response;
+    }
 
     public JwtToken signIn(String email) {
         // 1. email을 기반으로 Authentication 객체 생성
@@ -47,6 +68,19 @@ public class UserService {
                 .accessToken(bearerAccessToken)
                 .refreshToken(jwtToken.getRefreshToken())
                 .build();
+    }
+
+    @Transactional
+    public void logout(String token) {
+        if(token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        // 토큰 만료 시간 설정 (30분 후)
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
+        // 블랙리스트에 추가
+        BlacklistToken blacklistToken = new BlacklistToken(token, expiry);
+        blacklistTokenMapper.insertBlacklistToken(blacklistToken);
     }
 
 
@@ -151,7 +185,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Integer userId) {
         // 사용자 찾기
-        UserDTO userByUserId = getOptionalUserByUserId(userId)
+        getOptionalUserByUserId(userId)
                 .orElseThrow(() -> new UserNotExistsException(userId));
         // 사용자 삭제
         userMapper.deleteUserByUserId(userId);

@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // httpBasic 인증 방식 사용 x
                 .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(customAuthEntryPoint))
+                        .authenticationEntryPoint(customAuthEntryPoint)) // 토큰 오류 핸들링
 
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
 
@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // 모든 OPTIONS 요청 허용
                         .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/**", "/auth/login/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 

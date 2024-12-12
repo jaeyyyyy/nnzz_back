@@ -2,7 +2,6 @@ package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.config.security.SecurityUtils;
-import com.nnzz.nnzz.config.seed.Seed;
 import com.nnzz.nnzz.dto.LoginRequestDTO;
 import com.nnzz.nnzz.dto.LoginUserDTO;
 import com.nnzz.nnzz.dto.UpdateUserDTO;
@@ -18,9 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Tag(name="users", description = "냠냠쩝쩝 회원 추가 설정 및 회원 관리")
@@ -28,21 +29,21 @@ import java.util.regex.Pattern;
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 public class UserController {
+    private final SecurityUtils securityUtils;
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final Seed seed;
+
+    // 회원가입, 회원가입 전에 닉네임 사용가능 여부 체크, 로그인 제외 전부 토큰 필요
 
     /**
      * 회원가입
-     * 성공하면 db 저장 후, 바로 로그인 진행
+     * 성공하면 db 저장 후, 바로 로그인 과정 진행
      * @param user
      * @return
      */
     @Operation(summary = "register user", description = "<strong>\uD83D\uDCA1회원 정보를 db에 저장</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공"),
-            @ApiResponse(responseCode = "400", description = "이미 회원가입한 유저, 올바르지 않은 형식의 닉네임"),
-            @ApiResponse(responseCode = "409", description = "이미 사용중인 닉네임"),
+            @ApiResponse(responseCode = "400", description = "이미 회원가입한 유저, 올바르지 않은 형식의 닉네임, 이미 사용중인 닉네임"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
@@ -68,29 +69,28 @@ public class UserController {
             // 유효성 검증 실패
             throw new InvalidValueException(user.getNickname());
         } else {
-            // 조건 충족하면 회원가입시키고 로그인 -> 토큰 반환
+            // 조건 충족하면 회원가입시키고 로그인 -> 토큰과 함께 유저 정보를 반환
             UserDTO saveUser = userService.registerUser(user);
             JwtToken jwtToken = userService.signIn(saveUser.getEmail());
-            return ResponseEntity.ok(jwtToken);
+            Map<String, Object> response = userService.returnUserResponse(jwtToken, saveUser);
+            return ResponseEntity.ok(response);
         }
     }
 
     /**
      * 로그인
-     * @param loginRequest 로 email을 받으면 토큰값 리턴
+     * @param loginRequest 로 email을 받으면 토큰값과 유저 정보 리턴
      * @return
      */
     @Operation(summary = "login user", description = "<strong>\uD83D\uDCA1회원 로그인</strong>")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 완료 완료"),
+            @ApiResponse(responseCode = "200", description = "로그인 완료"),
             @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
             @Parameter(name = "email", description = "회원 이메일", required = true),
     })
-    // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         String email = loginRequest.getEmail();
@@ -102,8 +102,11 @@ public class UserController {
             UserDTO loginUser = userService.getOptionalUserByEmail(email).orElse(null);
 
             if(loginUser != null) {
+                // 토큰 생성
                 JwtToken jwtToken = userService.signIn(email);
-                return ResponseEntity.ok(jwtToken);
+                // 토큰과 함께 유저 정보 반환
+                Map<String, Object> response = userService.returnUserResponse(jwtToken, loginUser);
+                return ResponseEntity.ok(response);
 
 //                // 로그인 성공
 //                Authentication auth = authenticationManager.authenticate(
@@ -146,10 +149,34 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "logout user", description = "<strong>\uD83D\uDCA1회원 로그아웃</strong><br>블랙리스트에 토큰을 저장")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "회원 이메일", required = true),
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+        // 현재 인증된 사용자 정보
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth != null && auth.isAuthenticated()) {
+            // 로그아웃 처리
+            userService.logout(token);
+            return ResponseEntity.ok("로그아웃 성공");
+        } else {
+            return ResponseEntity.status(401).body("로그인 상태가 아닙니다.");
+        }
+    }
+
+
 
     @PostMapping("/test")
     public ResponseEntity<?> test(){
-        String email = SecurityUtils.getUserEmail();
+        String email = securityUtils.getUserEmail();
         UserDTO user = userService.getUserByEmail(email);
         LoginUserDTO loginUserDTO = LoginUserDTO.builder()
                 .id(user.getUserId())
@@ -171,12 +198,12 @@ public class UserController {
     @Operation(summary = "update user", description = "<strong>\uD83D\uDCA1회원정보를 db에 업데이트</strong><br>변경되지 않는 값도 전부(닉네임,프로필이미지,성별,나이대)를 받음")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 값(닉네임, 토큰 등), 이미 존재하는 닉네임, 가입되지 않은 유저"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
-            @Parameter(name = "nickname", description = "닉네임", required = true),
+            @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true),
             @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true),
             @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
@@ -184,17 +211,8 @@ public class UserController {
     @PatchMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserDTO updateUser) {
         // Authentication에서 가져온 유저 정보
-        String email = SecurityUtils.getUserEmail();
-        UserDTO authUser = userService.getUserByEmail(email);
-        //UserDTO authUser = SecurityUtils.getCurrentUser();
-        Integer authUserId;
-
-        if(authUser == null) {
-            throw new UnauthorizedException("인증되지 않은 유저입니다.");
-        } else {
-            // AuthUser에서 가져온 userId
-            authUserId = authUser.getUserId();
-        }
+        UserDTO authUser = securityUtils.getCurrentUser();
+        int authUserId = authUser.getUserId();
 
         // 요청 본문에서 가져온 닉네임
         String nickname = updateUser.getNickname();
@@ -247,38 +265,26 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping
     public ResponseEntity<?> deleteUser() {
-        Integer userId = SecurityUtils.getUserId();
+        Integer userId = securityUtils.getUserId();
 
-        if(userId != null) {
-            try {
-                userService.deleteUser(userId);
-                return ResponseEntity.ok("회원 탈퇴 성공");
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("알수 없는 오류입니다.");
-            }
-        } else {
-            throw new UserNotExistsException("[null]");
+        try {
+            userService.deleteUser(userId);
+            return ResponseEntity.ok("회원 탈퇴 성공");
+        } catch (Exception e) {
+            throw new RuntimeException("알 수 없는 오류입니다.");
         }
     }
 
-    // 유저의 정보를 가져오기
-//    @GetMapping
-//    public ResponseEntity<?> getUsers() {
-//        UserDTO authUser = SecurityUtils.getCurrentUser();
-//
-//        return ResponseEntity.ok(authUser); // 성공적으로 유저 정보를 반환
-//    }
 
     /**
      * 가능한 닉네임인지만 체크
      * @param nickname
      * @return
      */
-    @Operation(summary = "check nickname", description = "<strong>\uD83D\uDCA1사용가능한 닉네임인지 확인(중복, 유효한 값)</strong>")
+    @Operation(summary = "check nickname", description = "<strong>\uD83D\uDCA1사용가능한 닉네임인지 확인(중복, 유효한 값)</strong><br>회원가입 전에 사용가능한지 체크합니다")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 닉네임"),
+            @ApiResponse(responseCode = "400", description = "올바른 닉네임 형식이 아님, 이미 사용중인 닉네임"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
@@ -290,9 +296,9 @@ public class UserController {
         boolean isDuplicate = userService.checkNicknameExists(nickname, null);
 
         if (!invalidTest) {
-            throw new InvalidValueException(nickname);
+            throw new InvalidValueException("닉네임 : " + nickname + " 올바른 닉네임 형식이 아닙니다.");
         } else if (isDuplicate) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("중복된 닉네임입니다.");
+            throw new InvalidValueException("닉네임 : " + nickname + " 이미 사용중인 닉네임입니다.");
         } else {
             return ResponseEntity.ok("사용가능한 닉네임입니다.");
         }

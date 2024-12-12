@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserLocationController {
     private final UserService userService;
     private final UserLocationService userLocationService;
+    private final SecurityUtils securityUtils;
 
     private static final double[][] STATIONS = {
             {37.4939732, 127.0146391}, // 교대역
@@ -41,10 +42,9 @@ public class UserLocationController {
     })
     @GetMapping("/user")
     public ResponseEntity<?> getUserLocations() {
-        String email = SecurityUtils.getUserEmail();
-        UserDTO authUser = userService.getUserByEmail(email);
+        int authUserId = securityUtils.getUserId();
 
-        return ResponseEntity.ok(userLocationService.getUserLocations(authUser.getUserId()));
+        return ResponseEntity.ok(userLocationService.getUserLocations(authUserId));
     }
 
 
@@ -65,12 +65,7 @@ public class UserLocationController {
     @PostMapping("/save")
     public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request) {
 
-        String email = SecurityUtils.getUserEmail();
-        UserDTO authUser = userService.getUserByEmail(email);
-
-        if(authUser == null) {
-            throw new UnauthorizedException("유효한 사용자 정보가 없습니다."); // 이메일로 사용자 정보 조회 실패
-        }
+        int authUserId = securityUtils.getUserId();
 
         double lat = request.getLat();
         double lng = request.getLng();
@@ -81,7 +76,7 @@ public class UserLocationController {
 
         for (double[] station : STATIONS) {
             if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
-                userLocationService.saveUserLocation(authUser.getUserId(), lat, lng, address, buildingName);
+                userLocationService.saveUserLocation(authUserId, lat, lng, address, buildingName);
                 withinAnyStation = true; // 조건 만족 시 true로 설정
                 break; // 조건 만족하면 더 이상 체크할 필요 없음
             }
@@ -89,8 +84,8 @@ public class UserLocationController {
 
         if (!withinAnyStation) {
             throw new InvalidLocationException(lat, lng); // 모든 역에서 범위가 아닌 경우 예외 발생
+        } else {
+            return ResponseEntity.ok("위치가 성공적으로 저장되었습니다."); // 모든 역에서 범위가 아닌 경우 예외 발생
         }
-
-        return ResponseEntity.ok("위치가 성공적으로 저장되었습니다."); // 모든 역에서 범위가 아닌 경우 예외 발생
     }
 }

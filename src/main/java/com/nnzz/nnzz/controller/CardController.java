@@ -3,7 +3,7 @@ package com.nnzz.nnzz.controller;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.SaveCardDTO;
 import com.nnzz.nnzz.dto.ShowCardDTO;
-import com.nnzz.nnzz.exception.UnauthorizedException;
+import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +28,7 @@ import java.util.Map;
 @RequestMapping("/api/card")
 @RequiredArgsConstructor
 public class CardController {
+    private final SecurityUtils securityUtils;
     private final CardService cardService;
 
     /**
@@ -48,10 +49,11 @@ public class CardController {
     })
     @PostMapping("/make")
     public ResponseEntity<ShowCardDTO> makeCard(@RequestBody Map<String, String> requestBody) throws DateTimeParseException {
-        Integer userId = SecurityUtils.getUserId();
-        if (userId == null) {
-            throw new UnauthorizedException("인증되지 않은 유저입니다.");
-        }
+        UserDTO authUser = securityUtils.getCurrentUser();
+
+//        if (userId == null) {
+//            throw new UnauthorizedException("인증되지 않은 유저입니다.");
+//        }
 
         String storeId = requestBody.get("storeId"); // 가게아이디와
         String DateInput = requestBody.get("date"); // 날짜를 받아옴
@@ -71,7 +73,7 @@ public class CardController {
 
         int foodTypeId = cardService.getCategory(storeId);
         SaveCardDTO newCard = SaveCardDTO.builder()
-                .userId(userId) // spring security를 통해서 로그인 한 유저의 id를 가져옴
+                .userId(authUser.getUserId()) // spring security를 통해서 로그인 한 유저의 id를 가져옴
                 .storeId(storeId)
                 .foodTypeId(foodTypeId)
                 .cardDate(date)

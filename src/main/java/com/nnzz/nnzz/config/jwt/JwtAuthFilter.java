@@ -24,6 +24,18 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
+    // shouldNotFilter를 통하면 jwt 검증로직을 거치지 않음
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.contains("/login") ||
+                path.contains("/join") ||
+                path.contains("/check") ||
+                path.contains("/swagger") ||
+                path.contains("/api-docs");
+    }
+
+    // doFilter에서 검증 실패 시, AuthenticationException 발생 Full authentication is required to access this resource
     @Override
     public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         // preflight (OPTIONS) 요청인 경우에
@@ -32,6 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             chain.doFilter(req, res);
             return;
         }
+
 //        String path = req.getRequestURI();
 //        if(path.startsWith("/api")) {
 //            System.out.println("jwt필터 통과로직");
@@ -39,18 +52,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //            return;
 //        }
 
-
         // 1. Request Header에서 JWT 토큰 추출
         String token = resolveToken(req);
 
         // 2. validateToken 으로 토큰 유효성 검사
-        if(token != null && jwtTokenProvider.validateToken(token)) {
+        if(token != null && jwtTokenProvider.validateToken(token)) { // 이 부분을 지웠는데도 api문서가 안뜬다...
             // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
-
-
         chain.doFilter(req, res);
     }
 

@@ -1,8 +1,11 @@
 package com.nnzz.nnzz.config.jwt;
 
+import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,14 +24,15 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private final Key key;
-
+    private final BlacklistTokenMapper blacklistTokenMapper;
     /**
      * 32자 이상
      * @param secretKey
      */
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, @Qualifier("blacklistTokenMapper") BlacklistTokenMapper blacklistTokenMapper) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.blacklistTokenMapper = blacklistTokenMapper;
     }
 
 
@@ -42,13 +46,12 @@ public class JwtTokenProvider {
 
         /**
          * AccessToken 생성
-         * 클레임으로 auth와 email 사용
+         * 클레임으로 auth 사용
          */
         Date accessTokenExpiresIn = new Date(now + 1000 * 60 * 60 * 24);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
-                .claim("email", authentication.getName())
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -91,29 +94,25 @@ public class JwtTokenProvider {
 
     // 토큰을 파싱해서 만료시간을 함께 확인
     public boolean validateToken(String token) {
-        try {
-            // JWT 파싱
-            Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
-
-            // 만료 시간 확인
-            Date expiration = claimsJws.getBody().getExpiration();
-            return expiration.after(new Date()); // 현재 시간이 만료 시간보다 이전인지 확인
-        } catch (ExpiredJwtException e) {
-            // 만료된 JWT인 경우
-            return false;
-        } catch (JwtException | IllegalArgumentException e) {
-            // JWT가 유효하지 않은 경우 예외 처리
-            return false;
+        if(blacklistTokenMapper.existsByToken(token)) {
+            return false; // 블랙리스트에 존재하면 유효하지 않은 토큰
         }
 
-//        Jwts.parserBuilder()
-//                .setSigningKey(key)
-//                .build()
-//                .parseClaimsJws(token);
-//        return true;
+
+        Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
+        return true;
+            // JWT 파싱
+//            Jws<Claims> claimsJws = Jwts.parserBuilder()
+//                    .setSigningKey(key)
+//                    .build()
+//                    .parseClaimsJws(token);
+//
+//            // 만료 시간 확인
+//            Date expiration = claimsJws.getBody().getExpiration();
+//            return expiration.after(new Date()); // 현재 시간이 만료 시간보다 이전인지 확인
     }
 
     private Claims parseClaims(String accessToken) {

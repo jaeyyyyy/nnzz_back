@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### SECRET INFO ###
-application-key.properties
+application.properties

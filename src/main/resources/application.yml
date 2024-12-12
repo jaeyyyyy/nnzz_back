@@ -1,10 +1,9 @@
 spring:
   datasource:
-    hikari:
-      driver-class-name: org.postgresql.Driver
-      url: ${url}
-      username: ${user-name}
-      password: ${password}
+    driver-class-name: org.postgresql.Driver
+    url: ${database.url}
+    username: ${database.user-name}
+    password: ${database.password}
   application:
     name: nnzz
   profiles:

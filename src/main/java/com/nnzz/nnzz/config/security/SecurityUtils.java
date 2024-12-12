@@ -28,12 +28,13 @@ public class SecurityUtils {
     public int getUserId() {
         String userEmail = getUserEmail();
         UserDTO authUser = userService.getUserByEmail(userEmail);
-        if(authUser == null) {
+        if (authUser == null) {
             throw new UnauthorizedException(userEmail); // getUserByEmail쓰는 메서드가 전부 안먹는 이유.. email이 전부 anonymousUser 로 나온다. 도대체왜? -> api들어가면 전부 통과시켜서 인증을 안하나싶어서 그걸 풀어줬다.
         } else { // 그니까 하튼..인증을 받아야하는 메서드들은 인증을 받아야된다. 걔네를 안받고 그냥 넘겨주면 인증을 못하니까 유저가 안뜬다.
             // AuthUser에서 가져온 userId
             return authUser.getUserId();
         }
+    }
 
     public String getUserEmail() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

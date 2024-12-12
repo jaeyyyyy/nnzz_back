@@ -76,8 +76,8 @@ public class UserService {
             token = token.substring(7);
         }
 
-        // 토큰 만료 시간 설정 (30분 후)
-        LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
+        // 토큰 만료 시간 설정 (하루 뒤)
+        LocalDateTime expiry = LocalDateTime.now().plusDays(1);
         // 블랙리스트에 추가
         BlacklistToken blacklistToken = new BlacklistToken(token, expiry);
         blacklistTokenMapper.insertBlacklistToken(blacklistToken);

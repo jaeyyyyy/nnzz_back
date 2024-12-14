@@ -4,7 +4,7 @@ import com.nnzz.nnzz.dto.BroadcastDTO;
 import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.MenuDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
-import com.nnzz.nnzz.exception.InvalidValueException;
+import com.nnzz.nnzz.exception.FindStoreException;
 import com.nnzz.nnzz.repository.FindStoreMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +48,7 @@ public class FindStoreService {
         List<CategoryDTO> lunchCategories = getLunchCategoriesByLocation(currentLat, currentLong, dateString);
         // 리스트가 비어있지 않은지 확인
         if(lunchCategories.isEmpty()) {
-            throw new InvalidValueException("카테고리 리스트가 비어있음");
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
 
         // 랜덤 객체 생성
@@ -63,7 +66,7 @@ public class FindStoreService {
         List<CategoryDTO> dinnerCategories = getDinnerCategoriesByLocation(currentLat, currentLong, dateString);
         // 리스트가 비어있지 않은지 확인
         if(dinnerCategories.isEmpty()) {
-            throw new InvalidValueException("카테고리 리스트가 비어있음");
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
 
         // 랜덤 객체 생성
@@ -85,7 +88,7 @@ public class FindStoreService {
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
 
         if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
 
         // 오늘의 요일 가져오기
@@ -95,10 +98,7 @@ public class FindStoreService {
         List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
 
         // 3단계 : 최종적으로 category 가져오기
-        List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
-
-
-        return validCategories;
+        return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
     }
 
     // 저녁 가능 카테고리 가져오기
@@ -107,7 +107,7 @@ public class FindStoreService {
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
 
         if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
 
         // 오늘의 요일 가져오기
@@ -117,8 +117,7 @@ public class FindStoreService {
         List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
 
         // 3단계 : 최종적으로 category 가져오기
-        List<CategoryDTO> validCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
-        return validCategories;
+        return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
     }
 
     // 2. 가능한 가게 store_id를 가져오기
@@ -132,11 +131,10 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-        List<String> validLunchStoreIds = findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
 
-        return validLunchStoreIds;
+        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 750 저녁
@@ -148,12 +146,11 @@ public class FindStoreService {
         String currentDay = getCurrentDayOfWeek(dateString);
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
-//        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-//            return new ArrayList<>(); // 빈 리스트 반환
-//        }
-        List<String> validDinnerStoreIds = findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
+        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        }
 
-        return validDinnerStoreIds;
+        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
 
@@ -167,11 +164,10 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new InvalidValueException("영업중인 가게가 없어염");
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-        List<String> validLunchStoreIds = findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
 
-        return validLunchStoreIds;
+        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 500 저녁
@@ -184,11 +180,10 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new InvalidValueException("영업중인 가게가 없어염");
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-        List<String> validDinnerStoreIds = findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
 
-        return validDinnerStoreIds;
+        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
 
@@ -202,11 +197,10 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new InvalidValueException("영업중인 가게가 없어염");
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-        List<String> validLunchStoreIds = findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
 
-        return validLunchStoreIds;
+        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 250 저녁
@@ -219,11 +213,10 @@ public class FindStoreService {
 
         // 2단계 : 점심영업중인 가게의 store_id 가져오기
         if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            return new ArrayList<>(); // 빈 리스트 반환
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-        List<String> validDinnerStoreIds = findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
 
-        return validDinnerStoreIds;
+        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 최종 가게 리스트 반환하기
@@ -258,14 +251,15 @@ public class FindStoreService {
 
     // 전체 가게 정보 한 번에 가져오기
     public List<StoreDTO> getFinalStoresWithMenuAndBroadcast(double currentLat, double currentLong, List<String> storeIds) {
-        List<StoreDTO> stores = findStoreMapper.getFinalStoresDetail(currentLat, currentLong, storeIds);
 
-        return stores;
+        return findStoreMapper.getFinalStoresDetail(currentLat, currentLong, storeIds);
     }
 
     public StoreDTO getOneStoreDetail(double currentLat, double currentLong, String storeId) {
-        StoreDTO store = findStoreMapper.getOneStoreDetail(currentLat, currentLong, storeId);
+        if (storeId == null || storeId.isEmpty()) {
+            return null;
+        }
 
-        return store;
+        return findStoreMapper.getOneStoreDetail(currentLat, currentLong, storeId);
     }
 }

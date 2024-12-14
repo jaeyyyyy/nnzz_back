@@ -45,17 +45,17 @@
         <result property="cardDate" column="card_date"/>
         <result property="mealtime" column="mealtime"/>
         <result property="createdAt" column="created_at"/>
-        <collection property="stores" ofType="CardStoreDTO">
-            <id property="storeId" column="store_id"/>
-            <id property="name" column="name"/>
-            <id property="address" column="address"/>
-            <id property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
-        </collection>
-        <collection property="foodTypes" ofType="FoodTypeDTO">
-            <id property="foodTypeId" column="food_type_id"/>
-            <id property="category" column="category"/>
-            <id property="description" column="description"/>
-        </collection>
+        <!--<collection property="stores" ofType="CardStoreDTO">-->
+        <result property="storeId" column="store_id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
+        <!--</collection>-->
+        <!--<collection property="foodTypes" ofType="FoodTypeDTO">-->
+        <result property="foodTypeId" column="food_type_id"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <!--</collection>-->
     </resultMap>
     <select id="getCardFullInfo" resultMap="CardResultMap">
         <![CDATA[

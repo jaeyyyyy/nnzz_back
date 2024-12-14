@@ -2,6 +2,7 @@ package com.nnzz.nnzz.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,6 +22,10 @@ public class CustomExceptionHandler {
     }
 
     // 토큰관련 예외
+    @ExceptionHandler(AccountExpiredException.class)
+    public ProblemDetail handleAccountExpiredException(AccountExpiredException ex) {
+        return createProblemDetail(HttpStatus.UNAUTHORIZED, "올바른 형식의 토큰이 아닙니다.", ex.getMessage());
+    }
 //    @ExceptionHandler({SecurityException.class, MalformedJwtException.class})
 //    public ProblemDetail handleSecurityException(SecurityException ex) {
 //        return createProblemDetail(HttpStatus.BAD_REQUEST, "잘못된 jwt 서명입니다", ex.getMessage());
@@ -67,7 +72,7 @@ public class CustomExceptionHandler {
     // 인증되지 않은 유저
     @ExceptionHandler(UnauthorizedException.class)
     public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
-        return createProblemDetail(HttpStatus.UNAUTHORIZED, "인증되지 않은 유저입니다.", ex.getMessage());
+        return createProblemDetail(HttpStatus.UNAUTHORIZED, "유효한 토큰 값이 아닙니다.", ex.getMessage());
     }
 
     // 회원가입 시 오류
@@ -97,6 +102,10 @@ public class CustomExceptionHandler {
     }
 
 
+    @ExceptionHandler(FindStoreException.class)
+    public ProblemDetail handleFindStoreException(FindStoreException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "유효한 값이 아닙니다.", ex.getMessage());
+    }
 
 
     // 오픈되지 않은 지역

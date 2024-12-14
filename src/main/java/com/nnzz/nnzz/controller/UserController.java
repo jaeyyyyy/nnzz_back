@@ -1,12 +1,17 @@
 package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
+import com.nnzz.nnzz.config.security.SecurityUser;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.LoginRequestDTO;
 import com.nnzz.nnzz.dto.LoginUserDTO;
 import com.nnzz.nnzz.dto.UpdateUserDTO;
 import com.nnzz.nnzz.dto.UserDTO;
-import com.nnzz.nnzz.exception.*;
+import com.nnzz.nnzz.exception.InvalidValueException;
+import com.nnzz.nnzz.exception.NicknameDuplicateException;
+import com.nnzz.nnzz.exception.UserAlreadyExistsException;
+import com.nnzz.nnzz.exception.UserNotExistsException;
+import com.nnzz.nnzz.service.AuthService;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +35,8 @@ import java.util.regex.Pattern;
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final SecurityUtils securityUtils;
     private final UserService userService;
+    private final AuthService authService;
 
     // 회원가입, 회원가입 전에 닉네임 사용가능 여부 체크, 로그인 제외 전부 토큰 필요
 
@@ -71,7 +77,7 @@ public class UserController {
         } else {
             // 조건 충족하면 회원가입시키고 로그인 -> 토큰과 함께 유저 정보를 반환
             UserDTO saveUser = userService.registerUser(user);
-            JwtToken jwtToken = userService.signIn(saveUser.getEmail());
+            JwtToken jwtToken = authService.signIn(saveUser.getEmail());
             Map<String, Object> response = userService.returnUserResponse(jwtToken, saveUser);
             return ResponseEntity.ok(response);
         }
@@ -100,10 +106,11 @@ public class UserController {
         if (email != null) {
             // 해당 이메일을 가진 유저가 있는지 확인
             UserDTO loginUser = userService.getOptionalUserByEmail(email).orElse(null);
+            System.out.println("loginUser : " + loginUser);
 
             if(loginUser != null) {
                 // 토큰 생성
-                JwtToken jwtToken = userService.signIn(email);
+                JwtToken jwtToken = authService.signIn(email);
                 // 토큰과 함께 유저 정보 반환
                 Map<String, Object> response = userService.returnUserResponse(jwtToken, loginUser);
                 return ResponseEntity.ok(response);
@@ -176,7 +183,7 @@ public class UserController {
 
     @PostMapping("/test")
     public ResponseEntity<?> test(){
-        String email = securityUtils.getUserEmail();
+        String email = SecurityUtils.getUserEmail();
         UserDTO user = userService.getUserByEmail(email);
         LoginUserDTO loginUserDTO = LoginUserDTO.builder()
                 .id(user.getUserId())
@@ -187,6 +194,51 @@ public class UserController {
                 .age(user.getAgeRange())
                 .build();
         return ResponseEntity.ok(loginUserDTO);
+    }
+
+    @PostMapping("/test2")
+    public ResponseEntity<?> test2() {
+        int userId = SecurityUtils.getUserId();
+            // 현재 인증된 사용자의 정보를 @AuthenticationPrincipal 을 사용해서 가져와지는지 테스트
+            // 테스트 결과 유효한 토큰을 던져주면 userInfoDetails.getUserName() 시 email을 반환하고,
+            // 디버깅을 위한 로그 추가
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("Authentication object: " + authentication); // Authentication object: UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=kpark9700@naver.com12, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_USER]], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_USER]]
+            // UserDetails에 안담아보내면 Authentication object: UsernamePasswordAuthenticationToken [Principal=kpark9700@naver.com12, Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_USER]]
+            // 안담아보내면서 annonymou면 Authentication object: AnonymousAuthenticationToken [Principal=anonymousUser, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=13.209.221.99, SessionId=null], Granted Authorities=[ROLE_ANONYMOUS]]
+            // User를 implement한 SecurityUser에 담아보내는걸로 바꿈.. 이 메서드는 자고 일어나서 테스트하께요 개졸려
+
+            System.out.println("Principal: " + authentication.getPrincipal()); // Principal: org.springframework.security.core.userdetails.User [Username=kpark9700@naver.com12, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_USER]]
+            // Principal: kpark9700@naver.com12
+            // Principal: anonymousUser
+
+            // 명시적 타입 변환 및 검증
+//        if (authentication.getPrincipal() instanceof UserInfoDetails) {
+//            userInfoDetails = (UserInfoDetails) authentication.getPrincipal();
+//       }
+            // else {
+//            // 필요시 UserDTO에서 UserInfoDetails 재생성
+//            UserDTO user = userService.getUserByEmail(authentication.getName());
+//            userInfoDetails = new UserInfoDetails(user);
+//        }
+            String username = authentication.getName();
+            return ResponseEntity.ok(username);
+    }
+
+    @PostMapping("/test3")
+    public ResponseEntity<?> test3(@AuthenticationPrincipal SecurityUser auth) {
+        if(auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰이이상함");
+        }
+
+        // Authentication을 사용해서 가져오되, @RequestHeader를 명시한 경우
+        //Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // auth가 null인지 !Authenticated인지만 검증하면 로그아웃 해서 블랙리스트에 저장된 경우더라도 검증 성공이 된다..
+
+        //String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        // getName()을 하는 과정에서 내가 새로이 작성한 만료 여부까지 판단하는 듯하다.
+
+        return ResponseEntity.ok("유저 : "  + auth + " authentication 검증 성공");
     }
 
     /**
@@ -211,8 +263,9 @@ public class UserController {
     @PatchMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserDTO updateUser) {
         // Authentication에서 가져온 유저 정보
-        UserDTO authUser = securityUtils.getCurrentUser();
-        int authUserId = authUser.getUserId();
+
+        int authUserId = SecurityUtils.getUserId();
+        UserDTO authUser = userService.getUserByUserId(authUserId);
 
         // 요청 본문에서 가져온 닉네임
         String nickname = updateUser.getNickname();
@@ -254,8 +307,7 @@ public class UserController {
      */
     @Operation(summary = "delete user", description = "<strong>\uD83D\uDCA1회원 탈퇴</strong>")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "로그인 완료 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 토큰 값, 가입되지 않은 유저"),
+            @ApiResponse(responseCode = "200", description = "로그인 완료 완료"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 탈퇴 접근"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
@@ -265,7 +317,7 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping
     public ResponseEntity<?> deleteUser() {
-        Integer userId = securityUtils.getUserId();
+        Integer userId = SecurityUtils.getUserId();
 
         try {
             userService.deleteUser(userId);

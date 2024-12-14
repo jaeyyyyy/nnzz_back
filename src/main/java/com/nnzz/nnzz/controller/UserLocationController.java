@@ -2,9 +2,7 @@ package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
-import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.exception.InvalidLocationException;
-import com.nnzz.nnzz.exception.UnauthorizedException;
 import com.nnzz.nnzz.service.UserLocationService;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +40,7 @@ public class UserLocationController {
     })
     @GetMapping("/user")
     public ResponseEntity<?> getUserLocations() {
-        int authUserId = securityUtils.getUserId();
+        int authUserId = SecurityUtils.getUserId();
 
         return ResponseEntity.ok(userLocationService.getUserLocations(authUserId));
     }
@@ -65,7 +63,7 @@ public class UserLocationController {
     @PostMapping("/save")
     public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request) {
 
-        int authUserId = securityUtils.getUserId();
+        int authUserId = SecurityUtils.getUserId();
 
         double lat = request.getLat();
         double lng = request.getLng();

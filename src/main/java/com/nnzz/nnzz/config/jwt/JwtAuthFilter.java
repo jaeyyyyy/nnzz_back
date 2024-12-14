@@ -56,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = resolveToken(req);
 
         // 2. validateToken 으로 토큰 유효성 검사
-        if(token != null && jwtTokenProvider.validateToken(token)) { // 이 부분을 지웠는데도 api문서가 안뜬다...
+        if(token != null && jwtTokenProvider.validateToken(token)) {
             // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);

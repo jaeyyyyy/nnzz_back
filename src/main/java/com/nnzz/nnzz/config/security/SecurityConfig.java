@@ -4,6 +4,7 @@ package com.nnzz.nnzz.config.security;
 import com.nnzz.nnzz.config.jwt.JwtAuthFilter;
 import com.nnzz.nnzz.config.jwt.JwtTokenProvider;
 import com.nnzz.nnzz.exception.CustomAuthEntryPoint;
+// import com.nnzz.nnzz.oauth.CustomAuthenticationProvider;
 import com.nnzz.nnzz.oauth.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,8 @@ public class SecurityConfig {
     private final CustomAuthenticationProvider customAuthenticationProvider;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, CustomAuthEntryPoint customAuthEntryPoint) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, CustomAuthEntryPoint customAuthEntryPoint, AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(customAuthenticationProvider);
         http.httpBasic(HttpBasicConfigurer::disable) // HTTP 기본 인증 비활성화
                 .formLogin(AbstractHttpConfigurer::disable) // httpBasic 인증 방식 사용 x
                 .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
@@ -54,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
+
 
         return http.build();
     }
@@ -82,12 +86,17 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider);
-        return authenticationManagerBuilder.build();
-    }
+//    @Bean
+//    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+//        AuthenticationManagerBuilder authenticationManagerBuilder =
+//                http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider);
+//        return authenticationManagerBuilder.build();
+//    }
 
+//    @Bean
+//    public AuthenticationManagerBuilder configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(customAuthenticationProvider);
+//        return auth;
+//    }
 }

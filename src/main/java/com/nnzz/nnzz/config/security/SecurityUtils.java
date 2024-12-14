@@ -11,38 +11,33 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SecurityUtils {
-    private final UserService userService;
 
-    public UserDTO getCurrentUser() {
-        String userEmail = getUserEmail();
-        UserDTO authUser = userService.getUserByEmail(userEmail);
-
-        if(authUser == null) {
-            throw new UnauthorizedException(userEmail); // getUserByEmail쓰는 메서드가 전부 안먹는 이유.. email이 전부 anonymousUser 로 나온다. 도대체왜? -> api들어가면 전부 통과시켜서 인증을 안하나싶어서 그걸 풀어줬다.
-        } else { // 그니까 하튼..인증을 받아야하는 메서드들은 인증을 받아야된다. 걔네를 안받고 그냥 넘겨주면 인증을 못하니까 유저가 안뜬다.
-            // AuthUser에서 가져온 userId
-            return authUser;
+    public static int getUserId() {
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            // Authentication 객체에 유효한 principal 객체가 없음
+            throw new UnauthorizedException("인증되지 않은 사용자입니다.");
+        }
+        Object principal = auth.getPrincipal();
+        if(principal instanceof SecurityUser) {
+            SecurityUser user = (SecurityUser) principal;
+            return user.getUserId();
+        } else {
+            // Authentication 객체에 anonymousUser 객체가 있음
+            throw new UnauthorizedException("인증되지 않은 사용자입니다.");
         }
     }
 
-    public int getUserId() {
-        String userEmail = getUserEmail();
-        UserDTO authUser = userService.getUserByEmail(userEmail);
-        if (authUser == null) {
-            throw new UnauthorizedException(userEmail); // getUserByEmail쓰는 메서드가 전부 안먹는 이유.. email이 전부 anonymousUser 로 나온다. 도대체왜? -> api들어가면 전부 통과시켜서 인증을 안하나싶어서 그걸 풀어줬다.
-        } else { // 그니까 하튼..인증을 받아야하는 메서드들은 인증을 받아야된다. 걔네를 안받고 그냥 넘겨주면 인증을 못하니까 유저가 안뜬다.
-            // AuthUser에서 가져온 userId
-            return authUser.getUserId();
-        }
-    }
+    public static String getUserEmail() {
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-    public String getUserEmail() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            throw new UnauthorizedException("인증 세션이 존재하지 않습니다."); // 세션 없음
+        if (auth == null || !auth.isAuthenticated()) {
+            // Authentication 객체에 유효한 principal 객체가 없음
+            throw new UnauthorizedException("인증되지 않은 사용자입니다.");
         }
-        if (!auth.isAuthenticated()) {
-            throw new UnauthorizedException("로그인 세션이 만료되었습니다."); // 세션 만료
+        if (auth.getName().equals("anonymousUser")) {
+            // Authentication 객체에 anonymousUser 객체가 있음
+            throw new UnauthorizedException("인증되지 않은 사용자입니다.");
         }
 
         return auth.getName();

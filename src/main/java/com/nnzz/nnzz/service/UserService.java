@@ -3,12 +3,14 @@ package com.nnzz.nnzz.service;
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.dto.BlacklistToken;
 import com.nnzz.nnzz.dto.LoginUserDTO;
+import com.nnzz.nnzz.dto.UpdateUserResponse;
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import com.nnzz.nnzz.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,17 @@ public class UserService {
     private final UserMapper userMapper;
     private final BlacklistTokenMapper blacklistTokenMapper;
 
+    // 성공시 응답
+    public UpdateUserResponse returnUpdateUserResponse() {
+        return new UpdateUserResponse(
+                "about:blank",
+                "OK",
+                200,
+                "사용자가 성공적으로 업데이트되었습니다.",
+                LocalDateTime.now().toString(),
+                "업데이트 완료"
+        );
+    }
 
     public Map<String, Object> returnUserResponse(JwtToken jwtToken, UserDTO loginUser) {
         Map<String, Object> response = new HashMap<>();

@@ -3,10 +3,7 @@ package com.nnzz.nnzz.controller;
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.config.security.SecurityUser;
 import com.nnzz.nnzz.config.security.SecurityUtils;
-import com.nnzz.nnzz.dto.LoginRequestDTO;
-import com.nnzz.nnzz.dto.LoginUserDTO;
-import com.nnzz.nnzz.dto.UpdateUserDTO;
-import com.nnzz.nnzz.dto.UserDTO;
+import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.exception.NicknameDuplicateException;
 import com.nnzz.nnzz.exception.UserAlreadyExistsException;
@@ -27,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -297,7 +295,8 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
-        return ResponseEntity.ok("사용자가 성공적으로 업데이트되었습니다.");
+        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        return ResponseEntity.ok(response);
     }
 
 

@@ -1,5 +1,6 @@
 package com.nnzz.nnzz.exception;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.AccountExpiredException;
@@ -101,17 +102,28 @@ public class CustomExceptionHandler {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "유효한 값이 아닙니다.", ex.getMessage());
     }
 
-
+    // 가게 관련해서 유효한 값을 넣지 않은 경우
     @ExceptionHandler(FindStoreException.class)
     public ProblemDetail handleFindStoreException(FindStoreException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "유효한 값이 아닙니다.", ex.getMessage());
     }
 
-
     // 오픈되지 않은 지역
     @ExceptionHandler(InvalidLocationException.class)
     public ProblemDetail handleInvalidLocationException(InvalidLocationException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "오픈되지 않은 지역입니다.", ex.getMessage());
+    }
+
+    // 이미 오픈된 지역
+    @ExceptionHandler(AlreadyValidLocationException.class)
+    public ProblemDetail handleAlreadyValidLocationException(AlreadyValidLocationException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "이미 오픈된 지역입니다.", ex.getMessage());
+    }
+
+    // 이미 오픈 요청을 한 지역
+    @ExceptionHandler(AlreadyRequestedLocationException.class)
+    public ProblemDetail handleAlreadyRequestedLocationException(AlreadyRequestedLocationException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "이미 오픈 요청한 지역입니다.", ex.getMessage());
     }
 
     // 날짜 형식이 맞지 않음

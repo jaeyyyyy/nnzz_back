@@ -2,6 +2,7 @@ package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
+import com.nnzz.nnzz.exception.AlreadyValidLocationException;
 import com.nnzz.nnzz.exception.InvalidLocationException;
 import com.nnzz.nnzz.service.UserLocationService;
 import com.nnzz.nnzz.service.UserService;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.xml.bind.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +47,43 @@ public class UserLocationController {
         return ResponseEntity.ok(userLocationService.getUserLocations(authUserId));
     }
 
+    @Operation(summary = "open request", description = "<strong>\uD83D\uDCA1지역 오픈 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "오픈 요청 성공"),
+            @ApiResponse(responseCode = "400", description = "올바르지 않은 값"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
+            @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
+            @Parameter(name = "address", description = "String 타입, 주소", required = true),
+            @Parameter(name = "buildingName", description = "String 타입, 건물명", required = true)
+    })
+    @PostMapping("/open")
+    public ResponseEntity<?> saveUserOpenRequest(@RequestBody SaveLocationRequest request) {
+        int authUserId = SecurityUtils.getUserId();
+        double lat = request.getLat();
+        double lng = request.getLng();
+        String address = request.getAddress();
+        String buildingName = request.getBuildingName();
+
+        boolean withinAnyStation = false; // 조건 만족 여부를 추적하는 변수
+
+        for (double[] station : STATIONS) {
+            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
+                withinAnyStation = true; // 조건 만족 시 true로 설정
+                break; // 조건 만족하면 더 이상 체크할 필요 없음
+            }
+        }
+
+        if (withinAnyStation) {
+            throw new AlreadyValidLocationException(lat, lng); // 모든 역에서 범위가 아닐 때만 오픈 요청 가능
+        } else {
+            userLocationService.openUserLocation(authUserId, lat, lng, address, buildingName);
+            return ResponseEntity.ok("위치 오픈 신청이 완료되었습니다.");
+        }
+    }
 
 
     @Operation(summary = "save user location", description = "<strong>\uD83D\uDCA1유저의 위치를 db에 저장.</strong><br>최대 3개 가능")

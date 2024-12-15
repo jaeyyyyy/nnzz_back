@@ -15,4 +15,8 @@ public interface UserLocationMapper {
     void deleteOldestLocation(int userId);
 
     void insertUserLocation(@Param("userId") int userId, @Param("lat") double lat, @Param("lng") double lng, @Param("address") String address, @Param("buildingName") String buildingName);
+
+    void openUserLocation(@Param("userId") int userId, @Param("lat") double lat, @Param("lng") double lng, @Param("address") String address, @Param("buildingName") String buildingName);
+
+    boolean checkOpenUserRequest(@Param("userId") int userId, @Param("lat") double lat, @Param("lng") double lng, @Param("address") String address, @Param("buildingName") String buildingName);
 }

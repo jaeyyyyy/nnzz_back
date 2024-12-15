@@ -1,9 +1,9 @@
 package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.dto.UserLocationDTO;
+import com.nnzz.nnzz.exception.AlreadyRequestedLocationException;
 import com.nnzz.nnzz.repository.UserLocationMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,5 +46,17 @@ public class UserLocationService {
         }
         // 3. 새로운 위치 저장
         userLocationMapper.insertUserLocation(userId, lat, lng, address, buildingName);
+    }
+
+    public void openUserLocation(int userId, double lat, double lng, String address, String buildingName) {
+        // 현재 똑같은 오픈 요청이 들어와있는지 확인
+        boolean check = userLocationMapper.checkOpenUserRequest(userId, lat, lng, address, buildingName);
+        if(check) {
+            throw new AlreadyRequestedLocationException(lat, lng);
+        } else {
+            // 오픈요청이 들어와있지 않은 경우에 저장
+            userLocationMapper.openUserLocation(userId, lat, lng, address, buildingName);
+        }
+
     }
 }

@@ -39,4 +39,21 @@
         VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address}, #{buildingName})
     </insert>
 
+    <insert id="openUserLocation">
+        INSERT INTO open_request_locations (user_id, location, address, building_name)
+        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address}, #{buildingName})
+    </insert>
+
+    <select id="checkOpenUserRequest" resultType="boolean">
+        SELECT
+            CASE WHEN EXISTS (
+                SELECT 1
+                FROM open_request_locations
+                WHERE user_id = #{userId}
+                  AND ST_Equals(location, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326))
+                  AND address = #{address}
+                  AND building_name = #{buildingName}
+            ) THEN TRUE ELSE FALSE END
+    </select>
+
 </mapper>

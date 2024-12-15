@@ -382,7 +382,7 @@
     </select>
 
     <!--가게 하나 조회 쿼리-->
-    <resultMap id="oneStoreResultMap" type="StoreDTO">
+    <resultMap id="oneStoreResultMap" type="OneStoreDTO">
         <result property="storeId" column="store_id"/>
         <result property="name" column="name"/>
         <result property="address" column="address"/>
@@ -390,6 +390,7 @@
         <result property="lng" column="lng"/>
         <result property="distance" column="distance"/>
         <result property="category" column="category"/>
+        <result property="description" column="category_description"/>
         <result property="menus" column="menus" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
         <result property="broadcasts" column="broadcasts" typeHandler="com.nnzz.nnzz.config.handler.JsonbTypeHandler" />
     </resultMap>
@@ -419,6 +420,7 @@
             FLOOR(ST_DistanceSphere(s.location, ST_GeomFromText(CONCAT('POINT(', #{currentLong}, ' ', #{currentLat}, ')'), 4326))) AS distance,
             f.type1 AS category,
             f.food_type_id as category_id,
+            f.description as category_description,
             CASE
                 WHEN mc.cnt >= 3 THEN
                     COALESCE(jsonb_agg(
@@ -441,7 +443,7 @@
         FROM
             store s
                 LEFT JOIN
-            (SELECT st.store_id, f.type1, f.food_type_id
+            (SELECT st.store_id, f.type1, f.food_type_id, f.description
              FROM store st
                       JOIN food_type f ON st.category = f.type2
              WHERE st.store_id = #{storeId}) f ON s.store_id = f.store_id
@@ -456,7 +458,7 @@
         WHERE
             s.store_id = #{storeId}
         GROUP BY
-            s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts, f.food_type_id
+            s.store_id, s.name, s.address, s.location, f.type1, mc.cnt, b.broadcasts, f.food_type_id, f.description
         ]]>
     </select>
 </mapper>

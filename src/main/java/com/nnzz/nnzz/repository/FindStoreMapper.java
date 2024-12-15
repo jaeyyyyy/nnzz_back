@@ -1,9 +1,6 @@
 package com.nnzz.nnzz.repository;
 
-import com.nnzz.nnzz.dto.BroadcastDTO;
-import com.nnzz.nnzz.dto.CategoryDTO;
-import com.nnzz.nnzz.dto.MenuDTO;
-import com.nnzz.nnzz.dto.StoreDTO;
+import com.nnzz.nnzz.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -55,5 +52,5 @@ public interface FindStoreMapper {
     // 전체 리스트 가져오기
     List<StoreDTO> getFinalStoresDetail(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("storeIds") List<String> storeIds);
 
-    StoreDTO getOneStoreDetail(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("storeId") String storeId);
+    OneStoreDTO getOneStoreDetail(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong, @Param("storeId") String storeId);
 }

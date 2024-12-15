@@ -1,9 +1,6 @@
 package com.nnzz.nnzz.service;
 
-import com.nnzz.nnzz.dto.BroadcastDTO;
-import com.nnzz.nnzz.dto.CategoryDTO;
-import com.nnzz.nnzz.dto.MenuDTO;
-import com.nnzz.nnzz.dto.StoreDTO;
+import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.FindStoreException;
 import com.nnzz.nnzz.repository.FindStoreMapper;
 import lombok.RequiredArgsConstructor;
@@ -255,7 +252,7 @@ public class FindStoreService {
         return findStoreMapper.getFinalStoresDetail(currentLat, currentLong, storeIds);
     }
 
-    public StoreDTO getOneStoreDetail(double currentLat, double currentLong, String storeId) {
+    public OneStoreDTO getOneStoreDetail(double currentLat, double currentLong, String storeId) {
         if (storeId == null || storeId.isEmpty()) {
             return null;
         }

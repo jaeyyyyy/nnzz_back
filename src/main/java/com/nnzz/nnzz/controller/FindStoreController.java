@@ -3,6 +3,7 @@ package com.nnzz.nnzz.controller;
 import com.nnzz.nnzz.config.security.SecurityUser;
 import com.nnzz.nnzz.dto.CategoryDTO;
 import com.nnzz.nnzz.dto.FindStoreRequest;
+import com.nnzz.nnzz.dto.OneStoreDTO;
 import com.nnzz.nnzz.dto.StoreDTO;
 import com.nnzz.nnzz.exception.FindStoreException;
 import com.nnzz.nnzz.exception.UnauthorizedException;
@@ -319,7 +320,7 @@ public class FindStoreController {
             @Parameter(name = "storeId", description = "String 타입, 가게의 id", required = true)
     })
     @GetMapping("/store")
-    public ResponseEntity<StoreDTO> getOneStoreDetail(
+    public ResponseEntity<OneStoreDTO> getOneStoreDetail(
             @AuthenticationPrincipal SecurityUser user,
             @RequestParam Double lng, @RequestParam Double lat, @RequestParam String storeId) {
         if(user == null) {
@@ -330,7 +331,7 @@ public class FindStoreController {
                 throw new FindStoreException("lat, lng, storeId 값은 필수입니다.");
             }
 
-            StoreDTO store = findStoreService.getOneStoreDetail(lat, lng, storeId);
+            OneStoreDTO store = findStoreService.getOneStoreDetail(lat, lng, storeId);
 
             if (store == null) {
                 throw new FindStoreException("존재하지 않는 storeId 값입니다.");

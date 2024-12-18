@@ -51,6 +51,11 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
+tasks.bootJar {
+	archiveBaseName.set("nnzz") // JAR 파일 이름
+	archiveVersion.set(version.toString()) // 버전 설정
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }

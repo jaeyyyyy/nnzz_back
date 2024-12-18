@@ -1,7 +1,6 @@
 package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
-import com.nnzz.nnzz.config.security.SecurityUser;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.InvalidValueException;
@@ -17,14 +16,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -311,6 +307,6 @@ public class UserController {
 
     @PostMapping("/test1")
     public ResponseEntity<?> test1(){
-        return ResponseEntity.ok("CI/CD 잘되나 테스트");
+        return ResponseEntity.ok("제발잠좀자자");
     }
 }

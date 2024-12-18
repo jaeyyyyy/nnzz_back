@@ -53,7 +53,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean build --no-cache
+        run: ./gradlew clean build
 
       - name: List build/libs contents
         run: ls build/libs

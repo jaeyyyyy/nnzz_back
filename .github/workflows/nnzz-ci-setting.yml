@@ -44,6 +44,9 @@ jobs:
       - name: Deliver application.properties
         run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
+      - name: Change gradlew permissions
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
         run: ./gradlew build
 

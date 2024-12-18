@@ -178,67 +178,6 @@ public class UserController {
     }
 
 
-
-    @PostMapping("/test")
-    public ResponseEntity<?> test(){
-        String email = SecurityUtils.getUserEmail();
-        UserDTO user = userService.getUserByEmail(email);
-        LoginUserDTO loginUserDTO = LoginUserDTO.builder()
-                .id(user.getUserId())
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .gender(user.getGender())
-                .age(user.getAgeRange())
-                .build();
-        return ResponseEntity.ok(loginUserDTO);
-    }
-
-    @PostMapping("/test2")
-    public ResponseEntity<?> test2() {
-        int userId = SecurityUtils.getUserId();
-            // 현재 인증된 사용자의 정보를 @AuthenticationPrincipal 을 사용해서 가져와지는지 테스트
-            // 테스트 결과 유효한 토큰을 던져주면 userInfoDetails.getUserName() 시 email을 반환하고,
-            // 디버깅을 위한 로그 추가
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            System.out.println("Authentication object: " + authentication); // Authentication object: UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=kpark9700@naver.com12, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_USER]], Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_USER]]
-            // UserDetails에 안담아보내면 Authentication object: UsernamePasswordAuthenticationToken [Principal=kpark9700@naver.com12, Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_USER]]
-            // 안담아보내면서 annonymou면 Authentication object: AnonymousAuthenticationToken [Principal=anonymousUser, Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=13.209.221.99, SessionId=null], Granted Authorities=[ROLE_ANONYMOUS]]
-            // User를 implement한 SecurityUser에 담아보내는걸로 바꿈.. 이 메서드는 자고 일어나서 테스트하께요 개졸려
-
-            System.out.println("Principal: " + authentication.getPrincipal()); // Principal: org.springframework.security.core.userdetails.User [Username=kpark9700@naver.com12, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_USER]]
-            // Principal: kpark9700@naver.com12
-            // Principal: anonymousUser
-
-            // 명시적 타입 변환 및 검증
-//        if (authentication.getPrincipal() instanceof UserInfoDetails) {
-//            userInfoDetails = (UserInfoDetails) authentication.getPrincipal();
-//       }
-            // else {
-//            // 필요시 UserDTO에서 UserInfoDetails 재생성
-//            UserDTO user = userService.getUserByEmail(authentication.getName());
-//            userInfoDetails = new UserInfoDetails(user);
-//        }
-            String username = authentication.getName();
-            return ResponseEntity.ok(username);
-    }
-
-    @PostMapping("/test3")
-    public ResponseEntity<?> test3(@AuthenticationPrincipal SecurityUser auth) {
-        if(auth == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰이이상함");
-        }
-
-        // Authentication을 사용해서 가져오되, @RequestHeader를 명시한 경우
-        //Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // auth가 null인지 !Authenticated인지만 검증하면 로그아웃 해서 블랙리스트에 저장된 경우더라도 검증 성공이 된다..
-
-        //String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        // getName()을 하는 과정에서 내가 새로이 작성한 만료 여부까지 판단하는 듯하다.
-
-        return ResponseEntity.ok("유저 : "  + auth + " authentication 검증 성공");
-    }
-
     /**
      * 회원 정보 수정
      * 헤더에 토큰값이 없는 경우 에러
@@ -353,5 +292,20 @@ public class UserController {
         } else {
             return ResponseEntity.ok("사용가능한 닉네임입니다.");
         }
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<?> test(){
+        String email = SecurityUtils.getUserEmail();
+        UserDTO user = userService.getUserByEmail(email);
+        LoginUserDTO loginUserDTO = LoginUserDTO.builder()
+                .id(user.getUserId())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .gender(user.getGender())
+                .age(user.getAgeRange())
+                .build();
+        return ResponseEntity.ok(loginUserDTO);
     }
 }

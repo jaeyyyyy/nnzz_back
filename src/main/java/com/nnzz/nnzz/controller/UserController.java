@@ -308,4 +308,9 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(loginUserDTO);
     }
+
+    @PostMapping("/test1")
+    public ResponseEntity<?> test1(){
+        return ResponseEntity.ok("ci/cd 테스트");
+    }
 }

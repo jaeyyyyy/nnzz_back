@@ -53,12 +53,6 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
-tasks {
-	jar {
-		enabled = false
-	}
-}
-
 tasks.withType<Test> {
 	useJUnitPlatform()
 }

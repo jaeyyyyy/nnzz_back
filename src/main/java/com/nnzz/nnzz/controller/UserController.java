@@ -311,6 +311,6 @@ public class UserController {
 
     @PostMapping("/test1")
     public ResponseEntity<?> test1(){
-        return ResponseEntity.ok("ci/cd 테스트");
+        return ResponseEntity.ok("ci/cd 잘되는지 테스트");
     }
 }

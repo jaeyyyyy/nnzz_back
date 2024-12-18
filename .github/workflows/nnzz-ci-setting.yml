@@ -1,7 +1,7 @@
-# Github Actions에 표시되는 Workflow 이름
+# Github Actions 에 표시되는 Workflow 이름
 name: NNZZ CI/CD
 
-# master 브랜치로 push, pull request 가 발생하면 workflow를 실행
+# master 브랜치로 push, pull request 가 발생하면 workflow 를 실행
 on:
   push:
     branches: [ "master" ]
@@ -11,10 +11,11 @@ on:
 permissions:
   contents: read
 
-# workflow에서 실행할 동작
+# workflow 에서 실행할 동작
 jobs:
   CI:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +53,11 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean build
+        run: ./gradlew clean build --no-cache
+
+      - name: List build/libs contents
+        run: ls build/libs
+
 
       # Docker 로그인
       - name: Docker Login

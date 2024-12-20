@@ -57,8 +57,7 @@ public class UserLocationController {
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
-            @Parameter(name = "address", description = "String 타입, 주소", required = true),
-            @Parameter(name = "buildingName", description = "String 타입, 건물명", required = true)
+            @Parameter(name = "address", description = "String 타입, 주소", required = true)
     })
     @PostMapping("/open")
     public ResponseEntity<?> saveUserOpenRequest(@RequestBody SaveLocationRequest request) {
@@ -66,7 +65,6 @@ public class UserLocationController {
         double lat = request.getLat();
         double lng = request.getLng();
         String address = request.getAddress();
-        String buildingName = request.getBuildingName();
 
         boolean withinAnyStation = false; // 조건 만족 여부를 추적하는 변수
 
@@ -80,7 +78,7 @@ public class UserLocationController {
         if (withinAnyStation) {
             throw new AlreadyValidLocationException(lat, lng); // 모든 역에서 범위가 아닐 때만 오픈 요청 가능
         } else {
-            userLocationService.openUserLocation(authUserId, lat, lng, address, buildingName);
+            userLocationService.openUserLocation(authUserId, lat, lng, address);
             return ResponseEntity.ok("위치 오픈 신청이 완료되었습니다.");
         }
     }
@@ -96,8 +94,7 @@ public class UserLocationController {
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
-            @Parameter(name = "address", description = "String 타입, 주소", required = true),
-            @Parameter(name = "buildingName", description = "String 타입, 건물명", required = true)
+            @Parameter(name = "address", description = "String 타입, 주소", required = true)
     })
     @PostMapping("/save")
     public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request) {
@@ -107,13 +104,12 @@ public class UserLocationController {
         double lat = request.getLat();
         double lng = request.getLng();
         String address = request.getAddress();
-        String buildingName = request.getBuildingName();
 
         boolean withinAnyStation = false; // 조건 만족 여부를 추적하는 변수
 
         for (double[] station : STATIONS) {
             if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
-                userLocationService.saveUserLocation(authUserId, lat, lng, address, buildingName);
+                userLocationService.saveUserLocation(authUserId, lat, lng, address);
                 withinAnyStation = true; // 조건 만족 시 true로 설정
                 break; // 조건 만족하면 더 이상 체크할 필요 없음
             }

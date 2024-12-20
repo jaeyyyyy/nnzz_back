@@ -36,7 +36,7 @@ public class UserLocationService {
         return userLocationMapper.getUserLocations(userId);
     }
 
-    public void saveUserLocation(int userId, double lat, double lng, String address, String buildingName) {
+    public void saveUserLocation(int userId, double lat, double lng, String address) {
         // 1. 현재 저장된 위치 수 확인
         int count = userLocationMapper.countUserLocations(userId);
 
@@ -45,17 +45,17 @@ public class UserLocationService {
             userLocationMapper.deleteOldestLocation(userId);
         }
         // 3. 새로운 위치 저장
-        userLocationMapper.insertUserLocation(userId, lat, lng, address, buildingName);
+        userLocationMapper.insertUserLocation(userId, lat, lng, address);
     }
 
-    public void openUserLocation(int userId, double lat, double lng, String address, String buildingName) {
+    public void openUserLocation(int userId, double lat, double lng, String address) {
         // 현재 똑같은 오픈 요청이 들어와있는지 확인
-        boolean check = userLocationMapper.checkOpenUserRequest(userId, lat, lng, address, buildingName);
+        boolean check = userLocationMapper.checkOpenUserRequest(userId, lat, lng, address);
         if(check) {
             throw new AlreadyRequestedLocationException(lat, lng);
         } else {
             // 오픈요청이 들어와있지 않은 경우에 저장
-            userLocationMapper.openUserLocation(userId, lat, lng, address, buildingName);
+            userLocationMapper.openUserLocation(userId, lat, lng, address);
         }
 
     }

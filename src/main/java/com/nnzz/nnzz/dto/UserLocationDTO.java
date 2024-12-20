@@ -17,6 +17,5 @@ public class UserLocationDTO {
     private double lat;
     private double lng;
     private String address;
-    private String buildingName;
     private LocalDateTime createdAt;
 }

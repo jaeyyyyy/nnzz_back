@@ -15,5 +15,4 @@ public class SaveLocationRequest {
     private double lat;
     private double lng;
     private String address;
-    private String buildingName;
 }

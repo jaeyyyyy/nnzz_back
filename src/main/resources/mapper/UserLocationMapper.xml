@@ -10,7 +10,6 @@
             ST_X(location) as lng,
             ST_Y(location) as lat,
             address,
-            building_name,
             created_at
         FROM user_locations ul
         WHERE user_id = #{userId}
@@ -35,13 +34,13 @@
 
 
     <insert id="insertUserLocation">
-        INSERT INTO user_locations (user_id, location, address, building_name)
-        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address}, #{buildingName})
+        INSERT INTO user_locations (user_id, location, address)
+        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address})
     </insert>
 
     <insert id="openUserLocation">
-        INSERT INTO open_request_locations (user_id, location, address, building_name)
-        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address}, #{buildingName})
+        INSERT INTO open_request_locations (user_id, location, address)
+        VALUES (#{userId}, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326), #{address})
     </insert>
 
     <select id="checkOpenUserRequest" resultType="boolean">
@@ -52,7 +51,6 @@
                 WHERE user_id = #{userId}
                   AND ST_Equals(location, ST_GeomFromText(CONCAT('POINT(', #{lng}, ' ', #{lat}, ')'), 4326))
                   AND address = #{address}
-                  AND building_name = #{buildingName}
             ) THEN TRUE ELSE FALSE END
     </select>
 

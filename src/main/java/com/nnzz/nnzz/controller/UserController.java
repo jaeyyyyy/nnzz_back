@@ -43,7 +43,7 @@ public class UserController {
     @Operation(summary = "register user", description = "<strong>\uD83D\uDCA1회원 정보를 db에 저장</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공"),
-            @ApiResponse(responseCode = "400", description = "이미 회원가입한 유저, 올바르지 않은 형식의 닉네임, 이미 사용중인 닉네임"),
+            @ApiResponse(responseCode = "400", description = "이메일이 null인 경우, 이미 회원가입한 유저, 올바르지 않은 형식의 닉네임, 이미 사용중인 닉네임"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({

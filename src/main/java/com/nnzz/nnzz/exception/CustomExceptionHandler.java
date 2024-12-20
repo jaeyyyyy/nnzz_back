@@ -83,6 +83,12 @@ public class CustomExceptionHandler {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "닉네임이 중복됩니다.", ex.getMessage());
     }
 
+    @ExceptionHandler(EmailIsNullExcepion.class)
+    public ProblemDetail handleEmailIsNullException(EmailIsNullExcepion ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "이메일이 null 입니다.", ex.getMessage());
+    }
+
+
     // 회원 수정 시 오류
     // 닉네임 업데이트 횟수 초과
     @ExceptionHandler(NicknameUpdateException.class)

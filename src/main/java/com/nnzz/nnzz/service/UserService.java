@@ -5,6 +5,7 @@ import com.nnzz.nnzz.dto.BlacklistToken;
 import com.nnzz.nnzz.dto.LoginUserDTO;
 import com.nnzz.nnzz.dto.UpdateUserResponse;
 import com.nnzz.nnzz.dto.UserDTO;
+import com.nnzz.nnzz.exception.EmailIsNullExcepion;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
@@ -127,6 +128,11 @@ public class UserService {
     // 회원가입 처리
     @Transactional
     public UserDTO registerUser(UserDTO user) {
+        if(user.getEmail() == null) {
+            throw new EmailIsNullExcepion("회원가입 시 이메일은 필수 항목입니다.");
+        }
+
+
         UserDTO savedUser = UserDTO.builder()
                 .email(user.getEmail())
                 //.email(seed.encrypt(user.getEmail()))

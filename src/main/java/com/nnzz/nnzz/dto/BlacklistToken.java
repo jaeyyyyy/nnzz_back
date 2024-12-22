@@ -15,8 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "토큰 처리용 블랙리스트")
 public class BlacklistToken {
+    @Schema(description = "블랙리스트에 저장된 토큰 id")
     private int id;
+    @Schema(description = "토큰 값")
     private String token;
+    @Schema(description = "만료일자")
     private LocalDateTime expiry;
 
 

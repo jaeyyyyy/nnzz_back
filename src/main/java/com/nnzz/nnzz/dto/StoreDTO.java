@@ -1,5 +1,6 @@
 package com.nnzz.nnzz.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,15 +12,26 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "식당의 DTO")
 public class StoreDTO {
-    private String storeId; // 가게 id
-    private String name; // 가게 이름
-    private double lat; // 위도
-    private double lng; // 경도
-    private String address; // 가게 주소
-    private int distance; // 사용자와의 거리
-    private String category; // 냠냠쩝쩝 카테고리
-    private int categoryId; // 냠냠쩝쩝 카테고리 아이디
-    private List<BroadcastDTO> broadcasts; // 방송 정보
-    private List<MenuDTO> menus; // 메뉴 정보
+    @Schema(description = "식당 id")
+    private String storeId;
+    @Schema(description = "식당 이름")
+    private String name;
+    @Schema(description = "식당의 위도")
+    private double lat;
+    @Schema(description = "식당의 경도")
+    private double lng;
+    @Schema(description = "식당의 주소")
+    private String address;
+    @Schema(description = "식당과 사용자와의 거리")
+    private int distance;
+    @Schema(description = "식당의 카테고리")
+    private String category;
+    @Schema(description = "식당의 카테고리 id")
+    private int categoryId;
+    @Schema(description = "식당의 방송출연 정보")
+    private List<BroadcastDTO> broadcasts;
+    @Schema(description = "식당의 메뉴 정보")
+    private List<MenuDTO> menus;
 }

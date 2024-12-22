@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -13,6 +12,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
@@ -32,12 +32,19 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
-        String requestURI = request.getRequestURI();
+
+        // /error 가 아닌 실제 요청 URI를 가져오기 위해
+        String requestURI = (String) request.getAttribute("javax.servlet.error.request_uri");
+        if (requestURI == null) {
+            requestURI = request.getRequestURI();
+        }
+
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "올바른 형식의 토큰이 아닙니다.");
-        pd.setProperty("instance", requestURI);
+        pd.setInstance(URI.create(requestURI));
         pd.setProperty("timestamp", LocalDateTime.now());
         pd.setProperty("message", e.getMessage());
 
+        // json으로 반환하여 응답
         String problemDetail = objectMapper.writeValueAsString(pd);
 
         response.reset();

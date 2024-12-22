@@ -38,13 +38,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     // doFilter에서 검증 실패 시, AuthenticationException 발생 Full authentication is required to access this resource
     @Override
     public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
-        try {
-            // preflight (OPTIONS) 요청인 경우에
-            if(CorsUtils.isPreFlightRequest(req)) {
-                // 필터 처리를 건너뛰고 다음 필터로 진행
-                chain.doFilter(req, res);
-                return;
-            }
+        // preflight (OPTIONS) 요청인 경우에
+        if(CorsUtils.isPreFlightRequest(req)) {
+            // 필터 처리를 건너뛰고 다음 필터로 진행
+            chain.doFilter(req, res);
+            return;
+        }
 
 //        String path = req.getRequestURI();
 //        if(path.startsWith("/api")) {
@@ -53,21 +52,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //            return;
 //        }
 
-            // 1. Request Header에서 JWT 토큰 추출
-            String token = resolveToken(req);
+        // 1. Request Header에서 JWT 토큰 추출
+        String token = resolveToken(req);
 
-            // 2. validateToken 으로 토큰 유효성 검사
-            if(token != null && jwtTokenProvider.validateToken(token)) {
-                // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
-                Authentication auth = jwtTokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
-            chain.doFilter(req, res);
-        } catch (Exception e) {
-            // 예외가 발생해도 필터 체인은 계속 진행되어야 함
-            chain.doFilter(req, res);
+        // 2. validateToken 으로 토큰 유효성 검사
+        if(token != null && jwtTokenProvider.validateToken(token)) {
+            // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
+            Authentication auth = jwtTokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
-
+        chain.doFilter(req, res);
     }
 
 

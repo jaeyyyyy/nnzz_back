@@ -1,17 +1,21 @@
 package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUtils;
+import com.nnzz.nnzz.dto.CardRequest;
 import com.nnzz.nnzz.dto.SaveCardDTO;
 import com.nnzz.nnzz.dto.ShowCardDTO;
 import com.nnzz.nnzz.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,13 +35,14 @@ public class CardController {
 
     /**
      * 최종선택 가게를 저장하고 보여줌
-     * @param requestBody
+     * @param request
      * @return
      */
     @Operation(summary = "make card and show card", description = "<strong>\uD83D\uDCA1유저가 최종선택한 가게를 db에 저장하고 바로 보여줍니다</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 날짜"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 날짜",
+                content = @Content(schema = @Schema(implementation = DateTimeParseException.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근"),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
@@ -46,11 +51,11 @@ public class CardController {
             @Parameter(name = "date", description = "String 타입, (예) yyyy-MM-dd 저녁", required = true)
     })
     @PostMapping("")
-    public ResponseEntity<ShowCardDTO> makeCard(@RequestBody Map<String, String> requestBody) throws DateTimeParseException {
+    public ResponseEntity<ShowCardDTO> makeCard(@RequestBody CardRequest request) throws DateTimeParseException {
         int authUserId = SecurityUtils.getUserId();
 
-        String storeId = requestBody.get("storeId"); // 가게아이디와
-        String DateInput = requestBody.get("date"); // 날짜를 받아옴
+        String storeId = request.getStoreId(); // 가게아이디와
+        String DateInput = request.getDate(); // 날짜를 받아옴
 
         String[] parts = DateInput.split(" "); // 공백기준으로 분리
         String requestDate = parts[0];

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -197,7 +198,7 @@ public class UserController {
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
     })
     @PatchMapping("/update")
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDTO updateUser) {
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDTO updateUser, HttpServletRequest httpServletRequest) {
         // Authentication에서 가져온 유저 정보
 
         int authUserId = SecurityUtils.getUserId();
@@ -233,7 +234,7 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
-        ResponseDetail response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -247,7 +248,7 @@ public class UserController {
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true)
     })
     @PatchMapping("/nickname")
-    public ResponseEntity<ResponseDetail> updateUserNickname(@RequestBody UpdateUserDTO.NicknameRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserNickname(@RequestBody UpdateUserDTO.NicknameRequest request, HttpServletRequest httpServletRequest) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 닉네임
         String nickname = request.getNickname();
@@ -258,7 +259,7 @@ public class UserController {
         }
 
         userService.updateUserNickname(nickname, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -273,14 +274,14 @@ public class UserController {
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true)
     })
     @PatchMapping("/age-and-gender")
-    public ResponseEntity<ResponseDetail> updateUserAgeGender(@RequestBody UpdateUserDTO.AgeAndGenderRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserAgeGender(@RequestBody UpdateUserDTO.AgeAndGenderRequest request, HttpServletRequest httpServletRequest) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 나이대와 성별
         String ageRange = request.getAgeRange();
         String gender = request.getGender();
 
         userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -294,13 +295,13 @@ public class UserController {
             @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true)
     })
     @PatchMapping("/profile-image")
-    public ResponseEntity<ResponseDetail> updateUserProfileImage(@RequestBody UpdateUserDTO.ProfileImageRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserProfileImage(@RequestBody UpdateUserDTO.ProfileImageRequest request, HttpServletRequest httpServletRequest) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 프로필 이미지
         String profileImage = request.getProfileImage();
 
         userService.updateUserProfileImage(profileImage, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 

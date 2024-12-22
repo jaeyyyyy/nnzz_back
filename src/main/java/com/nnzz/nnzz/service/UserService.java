@@ -8,6 +8,7 @@ import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import com.nnzz.nnzz.repository.UserMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.stereotype.Service;
@@ -29,12 +30,13 @@ public class UserService {
     private final BlacklistTokenMapper blacklistTokenMapper;
 
     // 성공시 응답
-    public ResponseDetail returnUpdateUserResponse() {
+    public ResponseDetail returnUpdateUserResponse(String requestURI) {
         return new ResponseDetail(
                 "about:blank",
                 "OK",
                 200,
                 "사용자가 성공적으로 업데이트되었습니다.",
+                requestURI,
                 LocalDateTime.now().toString(),
                 "업데이트 완료"
         );

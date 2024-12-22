@@ -1,9 +1,6 @@
 package com.nnzz.nnzz.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Getter
@@ -14,4 +11,20 @@ public class UpdateUserDTO {
     private String profileImage;
     private String gender;
     private String ageRange;
+
+    @Data
+    public static class NicknameRequest {
+        private String nickname;
+    }
+
+    @Data
+    public static class ProfileImageRequest {
+        private String profileImage;
+    }
+
+    @Data
+    public static class AgeAndGenderRequest {
+        private String ageRange;
+        private String gender;
+    }
 }

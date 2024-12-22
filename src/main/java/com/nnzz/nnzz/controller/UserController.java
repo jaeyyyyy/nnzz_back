@@ -3,7 +3,10 @@ package com.nnzz.nnzz.controller;
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.*;
-import com.nnzz.nnzz.exception.*;
+import com.nnzz.nnzz.exception.InvalidValueException;
+import com.nnzz.nnzz.exception.NicknameDuplicateException;
+import com.nnzz.nnzz.exception.UserAlreadyExistsException;
+import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.service.AuthService;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -232,11 +234,21 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/update/nickname")
-    public ResponseEntity<?> updateUserNickname(@RequestBody UpdateUserDTO updateUser) {
+    @Operation(summary = "update user nickname", description = "<strong>\uD83D\uDCA1회원의 닉네임을 변경")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "업데이트 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true)
+    })
+    @PatchMapping("/nickname")
+    public ResponseEntity<?> updateUserNickname(@RequestBody UpdateUserDTO.NicknameRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 닉네임
-        String nickname = updateUser.getNickname();
+        String nickname = request.getNickname();
 
         // 이미 사용중인 닉네임인지 확인한다
         if(userService.checkNicknameExists(nickname, authUserId)){
@@ -248,23 +260,44 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/update/agegender")
-    public ResponseEntity<?> updateUserAgeGender(@RequestBody UpdateUserDTO updateUser) {
+    @Operation(summary = "update user age and gender", description = "<strong>\uD83D\uDCA1회원의 나이대와 성별을 변경")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "업데이트 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 나이대와 성별"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
+            @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true)
+    })
+    @PatchMapping("/age-and-gender")
+    public ResponseEntity<?> updateUserAgeGender(@RequestBody UpdateUserDTO.AgeAndGenderRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 나이대와 성별
-        String ageRange = updateUser.getAgeRange();
-        String gender = updateUser.getGender();
+        String ageRange = request.getAgeRange();
+        String gender = request.getGender();
 
         userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
         UpdateUserResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/update/profileImage")
-    public ResponseEntity<?> updateUserProfileImage(@RequestBody UpdateUserDTO updateUser) {
+    @Operation(summary = "update user profile image", description = "<strong>\uD83D\uDCA1회원의 프로필 이미지를 변경")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "업데이트 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
+    @Parameters({
+            @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true)
+    })
+    @PatchMapping("/profile-image")
+    public ResponseEntity<?> updateUserProfileImage(@RequestBody UpdateUserDTO.ProfileImageRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 프로필 이미지
-        String profileImage = updateUser.getProfileImage();
+        String profileImage = request.getProfileImage();
 
         userService.updateUserProfileImage(profileImage, authUserId);
         UpdateUserResponse response = userService.returnUpdateUserResponse();

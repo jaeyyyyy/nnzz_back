@@ -12,17 +12,26 @@ public class UpdateUserDTO {
     private String gender;
     private String ageRange;
 
-    @Data
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NicknameRequest {
         private String nickname;
     }
 
-    @Data
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ProfileImageRequest {
         private String profileImage;
     }
 
-    @Data
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class AgeAndGenderRequest {
         private String ageRange;
         private String gender;

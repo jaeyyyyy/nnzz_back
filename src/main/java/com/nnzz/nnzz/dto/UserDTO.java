@@ -18,7 +18,10 @@ public class UserDTO {
     private String ageRange;
     private LocalDateTime lastNicknameChangeDate;
 
-    @Data
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class JoinRequest {
         private String email;
         private String nickname;

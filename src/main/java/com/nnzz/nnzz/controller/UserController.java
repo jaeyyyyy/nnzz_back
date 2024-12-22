@@ -23,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 
 @Tag(name="users", description = "냠냠쩝쩝 회원 추가 설정 및 회원 관리")
@@ -56,7 +55,7 @@ public class UserController {
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
     })
     @PostMapping("/join")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO.JoinRequest user) {
+    public ResponseEntity<UserResponse> registerUser(@RequestBody UserDTO.JoinRequest user) {
 
         // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
         boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", user.getNickname());
@@ -94,7 +93,7 @@ public class UserController {
             @Parameter(name = "email", description = "회원 이메일", required = true),
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         // String encryptedEmail = seed.encrypt(loginRequest.getEmail());
 
@@ -164,13 +163,13 @@ public class UserController {
             @Parameter(name = "email", description = "회원 이메일", required = true),
     })
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         // 현재 인증된 사용자 정보
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth != null && auth.isAuthenticated()) {
             // 로그아웃 처리
             userService.logout(token);
-            return ResponseEntity.ok("로그아웃 성공");
+            return ResponseEntity.ok("로그아웃에 성공했습니다.");
         } else {
             return ResponseEntity.status(401).body("로그인 상태가 아닙니다.");
         }
@@ -241,16 +240,14 @@ public class UserController {
     @Operation(summary = "update user nickname", description = "<strong>\uD83D\uDCA1회원의 닉네임을 변경")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근")
     })
     @Parameters({
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true)
     })
     @PatchMapping("/nickname")
-    public ResponseEntity<?> updateUserNickname(@RequestBody UpdateUserDTO.NicknameRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserNickname(@RequestBody UpdateUserDTO.NicknameRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 닉네임
         String nickname = request.getNickname();
@@ -268,17 +265,15 @@ public class UserController {
     @Operation(summary = "update user age and gender", description = "<strong>\uD83D\uDCA1회원의 나이대와 성별을 변경")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 나이대와 성별",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 나이대와 성별"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근")
     })
     @Parameters({
             @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true)
     })
     @PatchMapping("/age-and-gender")
-    public ResponseEntity<?> updateUserAgeGender(@RequestBody UpdateUserDTO.AgeAndGenderRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserAgeGender(@RequestBody UpdateUserDTO.AgeAndGenderRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 나이대와 성별
         String ageRange = request.getAgeRange();
@@ -291,19 +286,15 @@ public class UserController {
 
     @Operation(summary = "update user profile image", description = "<strong>\uD83D\uDCA1회원의 프로필 이미지를 변경")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 완료",
-                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지",
-                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "200", description = "업데이트 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근")
     })
     @Parameters({
             @Parameter(name = "profileImage", description = "냠냠쩝쩝에서 설정한 유저의 프로필 이미지", required = true)
     })
     @PatchMapping("/profile-image")
-    public ResponseEntity<?> updateUserProfileImage(@RequestBody UpdateUserDTO.ProfileImageRequest request) {
+    public ResponseEntity<ResponseDetail> updateUserProfileImage(@RequestBody UpdateUserDTO.ProfileImageRequest request) {
         int authUserId = SecurityUtils.getUserId();
         // 요청 본문에서 가져온 프로필 이미지
         String profileImage = request.getProfileImage();
@@ -329,7 +320,7 @@ public class UserController {
     })
     // 회원 탈퇴
     @DeleteMapping
-    public ResponseEntity<?> deleteUser() {
+    public ResponseEntity<String> deleteUser() {
         Integer userId = SecurityUtils.getUserId();
 
         try {
@@ -356,7 +347,7 @@ public class UserController {
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true),
     })
     @GetMapping("/check")
-    public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname) {
+    public ResponseEntity<String> checkNickname(@RequestParam("nickname") String nickname) {
         boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
         boolean isDuplicate = userService.checkNicknameExists(nickname, null);
 

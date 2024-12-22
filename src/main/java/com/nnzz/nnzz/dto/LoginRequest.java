@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FoodTypeDTO {
-    private int foodTypeId;
-    private String category;
-    private String description;
+public class LoginRequest {
+    private String email;
 }

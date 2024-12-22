@@ -102,6 +102,11 @@ public class CustomExceptionHandler {
         return createProblemDetail(HttpStatus.BAD_REQUEST, "아이디가 일치하지 않습니다.", ex.getMessage());
     }
 
+    @ExceptionHandler(NullException.class)
+    public ProblemDetail handleNullException(NullException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "수정할 값은 비워둘 수 없습니다.", ex.getMessage());
+    }
+
     // 글자수 초과 미만 등 올바른 형태가 아닌 값
     @ExceptionHandler(InvalidValueException.class)
     public ProblemDetail handleInvalidValueException(InvalidValueException ex) {

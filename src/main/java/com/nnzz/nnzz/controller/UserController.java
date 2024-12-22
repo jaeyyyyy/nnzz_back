@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -291,7 +292,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
             @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = AccountExpiredException.class))),
+                    content = @Content(schema = @Schema(implementation = AuthenticationException.class))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({

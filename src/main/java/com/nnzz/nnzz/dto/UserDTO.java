@@ -1,9 +1,6 @@
 package com.nnzz.nnzz.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -20,4 +17,13 @@ public class UserDTO {
     private String gender;
     private String ageRange;
     private LocalDateTime lastNicknameChangeDate;
+
+    @Data
+    public static class JoinRequest {
+        private String email;
+        private String nickname;
+        private String profileImage;
+        private String gender;
+        private String ageRange;
+    }
 }

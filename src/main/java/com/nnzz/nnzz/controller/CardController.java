@@ -2,6 +2,7 @@ package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.CardRequest;
+import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.SaveCardDTO;
 import com.nnzz.nnzz.dto.ShowCardDTO;
 import com.nnzz.nnzz.service.CardService;
@@ -42,10 +43,9 @@ public class CardController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "잘못된 형식의 날짜",
-                content = @Content(schema = @Schema(implementation = DateTimeParseException.class))),
+                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근",
-                content = @Content(schema = @Schema(implementation = DateTimeParseException.class))),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
     })
     @Parameters({
             @Parameter(name = "storeId", description = "String 타입, 최종선택한 가게의 storeId", required = true),

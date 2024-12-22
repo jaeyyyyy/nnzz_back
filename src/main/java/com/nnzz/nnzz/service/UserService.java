@@ -1,10 +1,7 @@
 package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
-import com.nnzz.nnzz.dto.BlacklistToken;
-import com.nnzz.nnzz.dto.LoginUserDTO;
-import com.nnzz.nnzz.dto.ProblemDetailResponse;
-import com.nnzz.nnzz.dto.UserDTO;
+import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.EmailIsNullExcepion;
 import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
@@ -32,8 +29,8 @@ public class UserService {
     private final BlacklistTokenMapper blacklistTokenMapper;
 
     // 성공시 응답
-    public ProblemDetailResponse returnUpdateUserResponse() {
-        return new ProblemDetailResponse(
+    public ResponseDetail returnUpdateUserResponse() {
+        return new ResponseDetail(
                 "about:blank",
                 "OK",
                 200,
@@ -43,9 +40,7 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> returnUserResponse(JwtToken jwtToken, UserDTO loginUser) {
-        Map<String, Object> response = new HashMap<>();
-
+    public UserResponse returnUserResponse(JwtToken jwtToken, UserDTO loginUser) {
         LoginUserDTO loginUserDTO = LoginUserDTO.builder()
                 .id(loginUser.getUserId())
                 .nickname(loginUser.getNickname())
@@ -55,10 +50,10 @@ public class UserService {
                 .age(loginUser.getAgeRange())
                 .build();
 
-        response.put("token", jwtToken);
-        response.put("user", loginUserDTO);
-
-        return response;
+        return UserResponse.builder()
+                .token(jwtToken)
+                .user(loginUserDTO)
+                .build();
     }
 
 
@@ -175,11 +170,10 @@ public class UserService {
 
     // 회원가입 처리
     @Transactional
-    public UserDTO registerUser(UserDTO user) {
+    public UserDTO registerUser(UserDTO.JoinRequest user) {
         if(user.getEmail() == null) {
             throw new EmailIsNullExcepion("회원가입 시 이메일은 필수 항목입니다.");
         }
-
 
         UserDTO savedUser = UserDTO.builder()
                 .email(user.getEmail())

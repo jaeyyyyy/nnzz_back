@@ -1,16 +1,15 @@
 package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUser;
-import com.nnzz.nnzz.dto.CategoryDTO;
-import com.nnzz.nnzz.dto.FindStoreRequest;
-import com.nnzz.nnzz.dto.OneStoreDTO;
-import com.nnzz.nnzz.dto.StoreDTO;
+import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.FindStoreException;
 import com.nnzz.nnzz.exception.UnauthorizedException;
 import com.nnzz.nnzz.service.FindStoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,9 +31,10 @@ public class FindStoreController {
     @Operation(summary = "get lunch categories", description = "<strong>\uD83D\uDCA1카드액션 시작시 영업중인 점심 카드 가져오기</strong><br>(직선거리 750m 내에 점심 영업중인 가게들의 카테고리 찾기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -56,9 +56,10 @@ public class FindStoreController {
     @Operation(summary = "get dinner categories", description = "<strong>\uD83D\uDCA1카드액션 시작시 영업중인 저녁 카드 가져오기</strong><br>(직선거리 750m 내에 저녁 영업중인 가게들의 카테고리 찾기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -80,7 +81,8 @@ public class FindStoreController {
     @Operation(summary = "get random lunch category", description = "<strong>\uD83D\uDCA1점심 영업중인 카드 랜덤하게 가져오기</strong><br>(직선거리 750m 내에 점심 영업중인 가게중 랜덤 카테고리 하나 고르기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -102,7 +104,8 @@ public class FindStoreController {
     @Operation(summary = "get random dinner category", description = "<strong>\uD83D\uDCA1저녁 영업중인 카드 랜덤하게 가져오기</strong><br>(직선거리 750m 내에 저녁 영업중인 가게중 랜덤 카테고리 하나 고르기)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -126,7 +129,8 @@ public class FindStoreController {
             description = "<strong>\uD83D\uDCA1카드액션 선택이 끝난 후 점심 식당 정보 보러가기(디폴트 값 = 750m)</strong><br>get lunch/dinner (거리값) api들은 categoryList(배열)을 파라미터로 필요로 해서 GET 방식이 아닌 POST 방식을 사용함.<br>직선거리 750m 내에 점심 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -156,7 +160,8 @@ public class FindStoreController {
     @Operation(summary = "get dinner 750", description = "<strong>\uD83D\uDCA1카드액션 선택이 끝난 후 저녁 식당 정보 보러가기(디폴트 값 = 750m)</strong><br>직선거리 750m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -191,7 +196,8 @@ public class FindStoreController {
     @Operation(summary = "get lunch 500", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 500m로 바꿀 경우(점심)</strong><br>직선거리 500m 내에 점심 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -221,7 +227,8 @@ public class FindStoreController {
     @Operation(summary = "get dinner 500", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 500m로 바꿀 경우(저녁)</strong><br>직선거리 500m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -251,7 +258,8 @@ public class FindStoreController {
     @Operation(summary = "get lunch 250", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 250m로 바꿀 경우(점심)</strong><br>직선거리 250m 내에 점심 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -281,7 +289,8 @@ public class FindStoreController {
     @Operation(summary = "get dinner 250", description = "<strong>\uD83D\uDCA1결과 표기 화면에서 거리를 250m로 바꿀 경우(저녁)</strong><br>직선거리 250m 내에 저녁 영업중인 가게들의 리스트 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -311,8 +320,10 @@ public class FindStoreController {
     @Operation(summary = "get one store detail", description = "<strong>\uD83D\uDCA1결과표기 화면에서 특정 가게 1곳 클릭할 경우</strong><br>가게 1곳의 정보를 가져오기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가게 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 lat, lng, storeId 값"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근")
+            @ApiResponse(responseCode = "400", description = "유효하지 않은 lat, lng, storeId 값",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),

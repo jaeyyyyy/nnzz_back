@@ -1,5 +1,6 @@
 package com.nnzz.nnzz.dto;
 
+import com.nnzz.nnzz.config.jwt.JwtToken;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,11 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProblemDetailResponse {
-    private String type;
-    private String title;
-    private int status;
-    private String detail;
-    private String timestamp;
-    private String message;
+public class UserResponse {
+    private JwtToken token;
+    private LoginUserDTO user;
 }

@@ -1,6 +1,7 @@
 package com.nnzz.nnzz.controller;
 
 import com.nnzz.nnzz.config.security.SecurityUtils;
+import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
 import com.nnzz.nnzz.exception.AlreadyValidLocationException;
 import com.nnzz.nnzz.exception.InvalidLocationException;
@@ -9,6 +10,8 @@ import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.xml.bind.ValidationException;
@@ -50,9 +53,10 @@ public class UserLocationController {
     @Operation(summary = "open request", description = "<strong>\uD83D\uDCA1지역 오픈 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "오픈 요청 성공"),
-            @ApiResponse(responseCode = "400", description = "올바르지 않은 값"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "올바르지 않은 값",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
@@ -87,9 +91,10 @@ public class UserLocationController {
     @Operation(summary = "save user location", description = "<strong>\uD83D\uDCA1유저의 위치를 db에 저장.</strong><br>최대 3개 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "위치 저장 성공"),
-            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),

@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +45,8 @@ public class UserController {
     @Operation(summary = "register user", description = "<strong>\uD83D\uDCA1회원 정보를 db에 저장</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공"),
-            @ApiResponse(responseCode = "400", description = "이메일이 null인 경우, 이미 회원가입한 유저, 올바르지 않은 형식의 닉네임, 이미 사용중인 닉네임"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "이메일이 null인 경우, 이미 회원가입한 유저, 올바르지 않은 형식의 닉네임, 이미 사용중인 닉네임",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "email", description = "카카오 oauth에서 받아온 유저의 이메일", required = true),
@@ -57,7 +56,7 @@ public class UserController {
             @Parameter(name = "ageRange", description = "냠냠쩝쩝에서 설정한 유저의 나이대", required = true),
     })
     @PostMapping("/join")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO user) {
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO.JoinRequest user) {
 
         // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
         boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", user.getNickname());
@@ -75,7 +74,7 @@ public class UserController {
             // 조건 충족하면 회원가입시키고 로그인 -> 토큰과 함께 유저 정보를 반환
             UserDTO saveUser = userService.registerUser(user);
             JwtToken jwtToken = authService.signIn(saveUser.getEmail());
-            Map<String, Object> response = userService.returnUserResponse(jwtToken, saveUser);
+            UserResponse response = userService.returnUserResponse(jwtToken, saveUser);
             return ResponseEntity.ok(response);
         }
     }
@@ -88,8 +87,8 @@ public class UserController {
     @Operation(summary = "login user", description = "<strong>\uD83D\uDCA1회원 로그인</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "email", description = "회원 이메일", required = true),
@@ -109,7 +108,7 @@ public class UserController {
                 // 토큰 생성
                 JwtToken jwtToken = authService.signIn(email);
                 // 토큰과 함께 유저 정보 반환
-                Map<String, Object> response = userService.returnUserResponse(jwtToken, loginUser);
+                UserResponse response = userService.returnUserResponse(jwtToken, loginUser);
                 return ResponseEntity.ok(response);
 
 //                // 로그인 성공
@@ -156,9 +155,10 @@ public class UserController {
     @Operation(summary = "logout user", description = "<strong>\uD83D\uDCA1회원 로그아웃</strong><br>블랙리스트에 토큰을 저장")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그아웃 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "잘못된 값, 가입되지 않은 유저",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "email", description = "회원 이메일", required = true),
@@ -186,9 +186,10 @@ public class UserController {
     @Operation(summary = "update user", description = "<strong>\uD83D\uDCA1회원정보를 db에 업데이트</strong><br>변경되지 않는 값도 전부(닉네임,프로필이미지,성별,나이대)를 받음")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true),
@@ -233,16 +234,17 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
-        ProblemDetailResponse response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "update user nickname", description = "<strong>\uD83D\uDCA1회원의 닉네임을 변경")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 닉네임, 이미 존재하는 닉네임",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true)
@@ -259,16 +261,17 @@ public class UserController {
         }
 
         userService.updateUserNickname(nickname, authUserId);
-        ProblemDetailResponse response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "update user age and gender", description = "<strong>\uD83D\uDCA1회원의 나이대와 성별을 변경")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 나이대와 성별"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 나이대와 성별",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "gender", description = "냠냠쩝쩝에서 설정한 유저의 성별", required = true),
@@ -282,18 +285,18 @@ public class UserController {
         String gender = request.getGender();
 
         userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
-        ProblemDetailResponse response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "update user profile image", description = "<strong>\uD83D\uDCA1회원의 프로필 이미지를 변경")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 완료",
-                content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
+                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지",
-                content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
+                content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
@@ -306,7 +309,7 @@ public class UserController {
         String profileImage = request.getProfileImage();
 
         userService.updateUserProfileImage(profileImage, authUserId);
-        ProblemDetailResponse response = userService.returnUpdateUserResponse();
+        ResponseDetail response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
@@ -318,8 +321,8 @@ public class UserController {
     @Operation(summary = "delete user", description = "<strong>\uD83D\uDCA1회원 탈퇴</strong>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 완료 완료"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 탈퇴 접근"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 탈퇴 접근",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "email", description = "회원 이메일", required = true),
@@ -346,8 +349,8 @@ public class UserController {
     @Operation(summary = "check nickname", description = "<strong>\uD83D\uDCA1사용가능한 닉네임인지 확인(중복, 유효한 값)</strong><br>회원가입 전에 사용가능한지 체크합니다")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "올바른 닉네임 형식이 아님, 이미 사용중인 닉네임"),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+            @ApiResponse(responseCode = "400", description = "올바른 닉네임 형식이 아님, 이미 사용중인 닉네임",
+                    content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true),
@@ -366,23 +369,23 @@ public class UserController {
         }
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<?> test(){
-        String email = SecurityUtils.getUserEmail();
-        UserDTO user = userService.getUserByEmail(email);
-        LoginUserDTO loginUserDTO = LoginUserDTO.builder()
-                .id(user.getUserId())
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .gender(user.getGender())
-                .age(user.getAgeRange())
-                .build();
-        return ResponseEntity.ok(loginUserDTO);
-    }
-
-    @PostMapping("/test1")
-    public ResponseEntity<?> test1(){
-        return ResponseEntity.ok("제발잠좀자자");
-    }
+//    @PostMapping("/test")
+//    public ResponseEntity<?> test(){
+//        String email = SecurityUtils.getUserEmail();
+//        UserDTO user = userService.getUserByEmail(email);
+//        LoginUserDTO loginUserDTO = LoginUserDTO.builder()
+//                .id(user.getUserId())
+//                .nickname(user.getNickname())
+//                .email(user.getEmail())
+//                .profileImage(user.getProfileImage())
+//                .gender(user.getGender())
+//                .age(user.getAgeRange())
+//                .build();
+//        return ResponseEntity.ok(loginUserDTO);
+//    }
+//
+//    @PostMapping("/test1")
+//    public ResponseEntity<?> test1(){
+//        return ResponseEntity.ok("테스트");
+//    }
 }

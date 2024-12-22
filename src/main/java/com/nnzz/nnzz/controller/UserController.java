@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -234,7 +233,7 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
-        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        ProblemDetailResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
@@ -260,7 +259,7 @@ public class UserController {
         }
 
         userService.updateUserNickname(nickname, authUserId);
-        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        ProblemDetailResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
@@ -283,16 +282,18 @@ public class UserController {
         String gender = request.getGender();
 
         userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
-        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        ProblemDetailResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "update user profile image", description = "<strong>\uD83D\uDCA1회원의 프로필 이미지를 변경")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 완료"),
-            @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지"),
+            @ApiResponse(responseCode = "200", description = "업데이트 완료",
+                content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 형식의 프로필 이미지",
+                content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 수정 접근",
-                    content = @Content(schema = @Schema(implementation = AuthenticationException.class))),
+                    content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
@@ -305,7 +306,7 @@ public class UserController {
         String profileImage = request.getProfileImage();
 
         userService.updateUserProfileImage(profileImage, authUserId);
-        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        ProblemDetailResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }
 

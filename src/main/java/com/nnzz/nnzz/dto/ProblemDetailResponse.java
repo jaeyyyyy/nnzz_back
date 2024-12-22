@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserResponse {
+public class ProblemDetailResponse {
     private String type;
     private String title;
     private int status;

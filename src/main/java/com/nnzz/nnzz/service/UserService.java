@@ -3,7 +3,7 @@ package com.nnzz.nnzz.service;
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.dto.BlacklistToken;
 import com.nnzz.nnzz.dto.LoginUserDTO;
-import com.nnzz.nnzz.dto.UpdateUserResponse;
+import com.nnzz.nnzz.dto.ProblemDetailResponse;
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.exception.EmailIsNullExcepion;
 import com.nnzz.nnzz.exception.InvalidValueException;
@@ -12,7 +12,6 @@ import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import com.nnzz.nnzz.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,8 +32,8 @@ public class UserService {
     private final BlacklistTokenMapper blacklistTokenMapper;
 
     // 성공시 응답
-    public UpdateUserResponse returnUpdateUserResponse() {
-        return new UpdateUserResponse(
+    public ProblemDetailResponse returnUpdateUserResponse() {
+        return new ProblemDetailResponse(
                 "about:blank",
                 "OK",
                 200,

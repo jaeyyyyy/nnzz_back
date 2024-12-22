@@ -43,7 +43,8 @@ public class CardController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "잘못된 형식의 날짜",
                 content = @Content(schema = @Schema(implementation = DateTimeParseException.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 카드 생성 접근",
+                content = @Content(schema = @Schema(implementation = DateTimeParseException.class))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
     })
     @Parameters({
@@ -51,7 +52,7 @@ public class CardController {
             @Parameter(name = "date", description = "String 타입, (예) yyyy-MM-dd 저녁", required = true)
     })
     @PostMapping("")
-    public ResponseEntity<ShowCardDTO> makeCard(@RequestBody CardRequest request) throws DateTimeParseException {
+    public ResponseEntity<ShowCardDTO> makeCard(@RequestBody CardRequest request) {
         int authUserId = SecurityUtils.getUserId();
 
         String storeId = request.getStoreId(); // 가게아이디와

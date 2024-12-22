@@ -5,7 +5,6 @@ import com.nnzz.nnzz.config.jwt.JwtAuthFilter;
 import com.nnzz.nnzz.config.jwt.JwtTokenProvider;
 import com.nnzz.nnzz.exception.CustomAuthEntryPoint;
 // import com.nnzz.nnzz.oauth.CustomAuthenticationProvider;
-import com.nnzz.nnzz.exception.RequestURIFilter;
 import com.nnzz.nnzz.oauth.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +36,7 @@ public class SecurityConfig {
     private final CustomAuthenticationProvider customAuthenticationProvider;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, CustomAuthEntryPoint customAuthEntryPoint, AuthenticationManagerBuilder auth, RequestURIFilter requestURIFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, CustomAuthEntryPoint customAuthEntryPoint, AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(customAuthenticationProvider);
         http.httpBasic(HttpBasicConfigurer::disable) // HTTP 기본 인증 비활성화
                 .formLogin(AbstractHttpConfigurer::disable) // httpBasic 인증 방식 사용 x
@@ -56,7 +55,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(requestURIFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
 

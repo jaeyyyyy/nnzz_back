@@ -33,14 +33,7 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
 
-        // /error 가 아닌 실제 요청 URI를 가져오기 위해
-        String requestURI = (String) request.getAttribute(RequestURIFilter.ORIGINAL_URI_ATTRIBUTE);
-        if (requestURI == null) {
-            requestURI = request.getRequestURI();
-        }
-
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "올바른 형식의 토큰이 아닙니다.");
-        pd.setInstance(URI.create(requestURI));
         pd.setProperty("timestamp", LocalDateTime.now());
         pd.setProperty("message", e.getMessage());
 

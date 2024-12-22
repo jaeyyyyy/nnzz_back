@@ -6,6 +6,7 @@ import com.nnzz.nnzz.dto.LoginUserDTO;
 import com.nnzz.nnzz.dto.UpdateUserResponse;
 import com.nnzz.nnzz.dto.UserDTO;
 import com.nnzz.nnzz.exception.EmailIsNullExcepion;
+import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
@@ -21,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -138,6 +140,13 @@ public class UserService {
     @Transactional
     public void updateUserNickname(String nickname, Integer userId) {
         if(nickname != null) {
+            // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
+            boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
+            if(!invalidTest) {
+                // 유효한 닉네임인지 먼저 확인
+                throw new InvalidValueException(nickname);
+            }
+
             UserDTO existingUser = getUserByUserId(userId);
             // 닉네임이 변경되었는지 확인
             if(!existingUser.getNickname().equals(nickname)){

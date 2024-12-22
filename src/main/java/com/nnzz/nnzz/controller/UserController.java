@@ -238,13 +238,6 @@ public class UserController {
         // 요청 본문에서 가져온 닉네임
         String nickname = updateUser.getNickname();
 
-        // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
-        boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
-        if(!invalidTest) {
-            // 유효한 닉네임인지 먼저 확인
-            throw new InvalidValueException(nickname);
-        }
-
         // 이미 사용중인 닉네임인지 확인한다
         if(userService.checkNicknameExists(nickname, authUserId)){
             throw new NicknameDuplicateException(nickname);

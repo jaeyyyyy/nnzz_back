@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -230,6 +231,52 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
+        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/update/nickname")
+    public ResponseEntity<?> updateUserNickname(@RequestBody UpdateUserDTO updateUser) {
+        int authUserId = SecurityUtils.getUserId();
+        // 요청 본문에서 가져온 닉네임
+        String nickname = updateUser.getNickname();
+
+        // 한글, 영어, 숫자만 가능 (공백 불가), 2자 이상 10자 이하
+        boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
+        if(!invalidTest) {
+            // 유효한 닉네임인지 먼저 확인
+            throw new InvalidValueException(nickname);
+        }
+
+        // 이미 사용중인 닉네임인지 확인한다
+        if(userService.checkNicknameExists(nickname, authUserId)){
+            throw new NicknameDuplicateException(nickname);
+        }
+
+        userService.updateUserNickname(nickname, authUserId);
+        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/update/agegender")
+    public ResponseEntity<?> updateUserAgeGender(@RequestBody UpdateUserDTO updateUser) {
+        int authUserId = SecurityUtils.getUserId();
+        // 요청 본문에서 가져온 나이대와 성별
+        String ageRange = updateUser.getAgeRange();
+        String gender = updateUser.getGender();
+
+        userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
+        UpdateUserResponse response = userService.returnUpdateUserResponse();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/update/profileImage")
+    public ResponseEntity<?> updateUserProfileImage(@RequestBody UpdateUserDTO updateUser) {
+        int authUserId = SecurityUtils.getUserId();
+        // 요청 본문에서 가져온 프로필 이미지
+        String profileImage = updateUser.getProfileImage();
+
+        userService.updateUserProfileImage(profileImage, authUserId);
         UpdateUserResponse response = userService.returnUpdateUserResponse();
         return ResponseEntity.ok(response);
     }

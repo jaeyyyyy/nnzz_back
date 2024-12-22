@@ -4,6 +4,7 @@ import com.nnzz.nnzz.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Optional;
 
@@ -12,6 +13,11 @@ public interface UserMapper {
     void createUser(UserDTO user);
 
     void updateUser(UserDTO user);
+
+    // 회원정보 수정(업데이트 중)
+    void updateUserProfileImage(@Param("profileImage") String profileImage, @Param("userId") Integer userId);
+    void updateUserNickname(@Param("nickname") String nickname, @Param("userId") Integer userId);
+    void updateUserAgeAndGender(@Param("gender") String gender, @Param("ageRange") String ageRange, @Param("userId") Integer userId);
 
     boolean existsUserByEmail(String email);
 

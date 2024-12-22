@@ -125,6 +125,40 @@ public class UserService {
         userMapper.updateUser(oldUser);
     }
 
+    // 회원정보 수정(프로필 이미지 수정)
+    @Transactional
+    public void updateUserProfileImage(String profileImage, Integer userId) {
+        // 프로필 이미지 업데이트
+        userMapper.updateUserProfileImage(profileImage, userId);
+    }
+
+    // 회원정보 수정(닉네임 변경)
+    @Transactional
+    public void updateUserNickname(String nickname, Integer userId) {
+        UserDTO existingUser = getUserByUserId(userId);
+        // 닉네임이 변경되었는지 확인
+        if(!existingUser.getNickname().equals(nickname)){
+            LocalDateTime lastChangeDate = existingUser.getLastNicknameChangeDate();
+            LocalDateTime now = LocalDateTime.now();
+
+            // 닉네임 변경 가능 여부 체크
+            if(lastChangeDate != null){
+                long daysBetween = ChronoUnit.DAYS.between(lastChangeDate, now);
+                if(daysBetween < 30){
+                    throw new NicknameUpdateException(nickname);
+                }
+            }
+        }
+
+        userMapper.updateUserNickname(nickname, userId);
+    }
+
+    // 회원정보 수정(성별/나이대 변경)
+    @Transactional
+    public void updateUserAgeRangeAndGender(String gender, String ageRange, Integer userId) {
+        userMapper.updateUserAgeAndGender(gender, ageRange, userId);
+    }
+
     // 회원가입 처리
     @Transactional
     public UserDTO registerUser(UserDTO user) {

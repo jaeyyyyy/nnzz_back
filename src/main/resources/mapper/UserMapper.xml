@@ -31,7 +31,35 @@
         VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange})
     </insert>
 
-    <!--유저 정보 수정-->
+    <!--유저 정보 수정(플필 이미지 변경)-->
+    <update id="updateUserProfileImage">
+        UPDATE users
+        SET profile_image = #{profileImage}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!--유저 정보 수정(닉네임 변경, 30일 동안 한번만 변경 가능)-->
+    <update id="updateUserNickname">
+        UPDATE users
+        SET nickname = #{nickname},
+            last_nickname_change_date =
+                CASE
+                    WHEN #{nickname} != (SELECT nickname FROM users WHERE user_id = #{userId})
+                        THEN NOW()
+                    ELSE last_nickname_change_date
+                END
+        WHERE user_id = #{userId}
+    </update>
+
+    <!--유저 정보 수정(성별/나이대)-->
+    <update id="updateUserAgeAndGender">
+        UPDATE users
+        SET gender = #{gender},
+            age_range = #{ageRange}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!--유저 정보 수정 (기존 쿼리)-->
     <update id="updateUser" parameterType="UserDTO">
         UPDATE users
         SET

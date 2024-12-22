@@ -34,7 +34,7 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json");
 
         // /error 가 아닌 실제 요청 URI를 가져오기 위해
-        String requestURI = (String) request.getAttribute("javax.servlet.error.request_uri");
+        String requestURI = (String) request.getAttribute(RequestURIFilter.ORIGINAL_URI_ATTRIBUTE);
         if (requestURI == null) {
             requestURI = request.getRequestURI();
         }

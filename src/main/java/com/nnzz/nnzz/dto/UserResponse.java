@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
-    private JwtToken token;
     private LoginUserDTO user;
+    private JwtToken token;
 }

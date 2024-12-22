@@ -51,7 +51,7 @@ public class CardController {
             @Parameter(name = "storeId", description = "String 타입, 최종선택한 가게의 storeId", required = true),
             @Parameter(name = "date", description = "String 타입, (예) yyyy-MM-dd 저녁", required = true)
     })
-    @PostMapping("")
+    @PostMapping("/make")
     public ResponseEntity<ShowCardDTO> makeCard(@RequestBody CardRequest request) {
         int authUserId = SecurityUtils.getUserId();
 

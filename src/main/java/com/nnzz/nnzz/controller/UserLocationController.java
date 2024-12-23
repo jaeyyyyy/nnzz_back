@@ -104,7 +104,7 @@ public class UserLocationController {
             @Parameter(name = "address", description = "String 타입, 주소", required = true)
     })
     @PostMapping("/save")
-    public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request) {
+    public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request, HttpServletRequest httpServletRequest) {
 
         int authUserId = SecurityUtils.getUserId();
 
@@ -125,7 +125,8 @@ public class UserLocationController {
         if (!withinAnyStation) {
             throw new InvalidLocationException(lat, lng); // 모든 역에서 범위가 아닌 경우 예외 발생
         } else {
-            return ResponseEntity.ok("위치가 성공적으로 저장되었습니다."); // 모든 역에서 범위가 아닌 경우 예외 발생
+            ResponseDetail responseDetail = userLocationService.returnSaveLocationResponse(httpServletRequest.getRequestURI());
+            return ResponseEntity.ok(responseDetail); // 모든 역에서 범위가 아닌 경우 예외 발생
         }
     }
 }

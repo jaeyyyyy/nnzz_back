@@ -45,6 +45,17 @@ public class UserLocationService {
         );
     }
 
+    public ResponseDetail returnSaveLocationResponse(String requestURI) {
+        return new ResponseDetail(
+                "about:blank",
+                "OK",
+                200,
+                "위치 저장이 완료되었습니다.",
+                requestURI,
+                LocalDateTime.now().toString(),
+                "위치 저장 완료"
+        );
+    }
 
     public List<UserLocationDTO> getUserLocations(int userId) {
         return userLocationMapper.getUserLocations(userId);

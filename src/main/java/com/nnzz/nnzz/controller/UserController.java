@@ -3,10 +3,7 @@ package com.nnzz.nnzz.controller;
 import com.nnzz.nnzz.config.jwt.JwtToken;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.*;
-import com.nnzz.nnzz.exception.InvalidValueException;
-import com.nnzz.nnzz.exception.NicknameDuplicateException;
-import com.nnzz.nnzz.exception.UserAlreadyExistsException;
-import com.nnzz.nnzz.exception.UserNotExistsException;
+import com.nnzz.nnzz.exception.*;
 import com.nnzz.nnzz.service.AuthService;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.sasl.AuthenticationException;
 import java.util.regex.Pattern;
 
 @Tag(name="users", description = "냠냠쩝쩝 회원 추가 설정 및 회원 관리")
@@ -164,15 +163,16 @@ public class UserController {
             @Parameter(name = "email", description = "회원 이메일", required = true),
     })
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ResponseDetail> logout(@RequestHeader("Authorization") String token, HttpServletRequest httpServletRequest) {
         // 현재 인증된 사용자 정보
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth != null && auth.isAuthenticated()) {
             // 로그아웃 처리
             userService.logout(token);
-            return ResponseEntity.ok("로그아웃에 성공했습니다.");
+            ResponseDetail responseDetail = userService.returnLogoutResponse(httpServletRequest.getRequestURI());
+            return ResponseEntity.ok(responseDetail);
         } else {
-            return ResponseEntity.status(401).body("로그인 상태가 아닙니다.");
+            throw new UnauthorizedException("로그인 된 사용자가 아닙니다.");
         }
     }
 
@@ -321,12 +321,13 @@ public class UserController {
     })
     // 회원 탈퇴
     @DeleteMapping
-    public ResponseEntity<String> deleteUser() {
+    public ResponseEntity<ResponseDetail> deleteUser(HttpServletRequest httpServletRequest) {
         Integer userId = SecurityUtils.getUserId();
 
         try {
             userService.deleteUser(userId);
-            return ResponseEntity.ok("회원 탈퇴 성공");
+            ResponseDetail responseDetail = userService.returnDeleteUserResponse(httpServletRequest.getRequestURI());
+            return ResponseEntity.ok(responseDetail);
         } catch (Exception e) {
             throw new RuntimeException("알 수 없는 오류입니다.");
         }
@@ -348,7 +349,7 @@ public class UserController {
             @Parameter(name = "nickname", description = "냠냠쩝쩝에서 설정한 유저의 닉네임", required = true),
     })
     @GetMapping("/check")
-    public ResponseEntity<String> checkNickname(@RequestParam("nickname") String nickname) {
+    public ResponseEntity<ResponseDetail> checkNickname(@RequestParam("nickname") String nickname, HttpServletRequest httpServletRequest) {
         boolean invalidTest = Pattern.matches("^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$", nickname);
         boolean isDuplicate = userService.checkNicknameExists(nickname, null);
 
@@ -357,7 +358,8 @@ public class UserController {
         } else if (isDuplicate) {
             throw new InvalidValueException("닉네임 : " + nickname + " 이미 사용중인 닉네임입니다.");
         } else {
-            return ResponseEntity.ok("사용가능한 닉네임입니다.");
+            ResponseDetail responseDetail = userService.returnCheckNicknameResponse(httpServletRequest.getRequestURI());
+            return ResponseEntity.ok(responseDetail);
         }
     }
 

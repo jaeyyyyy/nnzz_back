@@ -1,11 +1,13 @@
 package com.nnzz.nnzz.service;
 
+import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.UserLocationDTO;
 import com.nnzz.nnzz.exception.AlreadyRequestedLocationException;
 import com.nnzz.nnzz.repository.UserLocationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,6 +31,18 @@ public class UserLocationService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = R * c * 1000; // km를 m로 변환
         return distance;
+    }
+
+    public ResponseDetail returnOpenLocationResponse(String requestURI) {
+        return new ResponseDetail(
+                "about:blank",
+                "OK",
+                200,
+                "오픈 신청이 완료되었습니다.",
+                requestURI,
+                LocalDateTime.now().toString(),
+                "오픈 신청 완료"
+        );
     }
 
 

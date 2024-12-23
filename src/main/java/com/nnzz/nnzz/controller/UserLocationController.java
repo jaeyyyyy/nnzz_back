@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.xml.bind.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +65,7 @@ public class UserLocationController {
             @Parameter(name = "address", description = "String 타입, 주소", required = true)
     })
     @PostMapping("/open")
-    public ResponseEntity<?> saveUserOpenRequest(@RequestBody SaveLocationRequest request) {
+    public ResponseEntity<?> saveUserOpenRequest(@RequestBody SaveLocationRequest request, HttpServletRequest httpServletRequest) {
         int authUserId = SecurityUtils.getUserId();
         double lat = request.getLat();
         double lng = request.getLng();
@@ -83,7 +84,8 @@ public class UserLocationController {
             throw new AlreadyValidLocationException(lat, lng); // 모든 역에서 범위가 아닐 때만 오픈 요청 가능
         } else {
             userLocationService.openUserLocation(authUserId, lat, lng, address);
-            return ResponseEntity.ok("위치 오픈 신청이 완료되었습니다.");
+            ResponseDetail responseDetail = userLocationService.returnOpenLocationResponse(httpServletRequest.getRequestURI());
+            return ResponseEntity.ok(responseDetail);
         }
     }
 

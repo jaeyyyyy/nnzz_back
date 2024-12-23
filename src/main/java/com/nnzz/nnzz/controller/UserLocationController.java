@@ -5,8 +5,8 @@ import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
 import com.nnzz.nnzz.exception.AlreadyValidLocationException;
 import com.nnzz.nnzz.exception.InvalidLocationException;
+import com.nnzz.nnzz.service.ResponseDetailService;
 import com.nnzz.nnzz.service.UserLocationService;
-import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.xml.bind.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/location")
 @RequiredArgsConstructor
 public class UserLocationController {
-    private final UserService userService;
+    private final ResponseDetailService responseDetailService;
     private final UserLocationService userLocationService;
-    private final SecurityUtils securityUtils;
 
     private static final double[][] STATIONS = {
             {37.4939732, 127.0146391}, // 교대역
@@ -84,7 +82,7 @@ public class UserLocationController {
             throw new AlreadyValidLocationException(lat, lng); // 모든 역에서 범위가 아닐 때만 오픈 요청 가능
         } else {
             userLocationService.openUserLocation(authUserId, lat, lng, address);
-            ResponseDetail responseDetail = userLocationService.returnOpenLocationResponse(httpServletRequest.getRequestURI());
+            ResponseDetail responseDetail = responseDetailService.returnOpenLocationResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail);
         }
     }
@@ -125,7 +123,7 @@ public class UserLocationController {
         if (!withinAnyStation) {
             throw new InvalidLocationException(lat, lng); // 모든 역에서 범위가 아닌 경우 예외 발생
         } else {
-            ResponseDetail responseDetail = userLocationService.returnSaveLocationResponse(httpServletRequest.getRequestURI());
+            ResponseDetail responseDetail = responseDetailService.returnSaveLocationResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail); // 모든 역에서 범위가 아닌 경우 예외 발생
         }
     }

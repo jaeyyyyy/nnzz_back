@@ -5,6 +5,7 @@ import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.*;
 import com.nnzz.nnzz.exception.*;
 import com.nnzz.nnzz.service.AuthService;
+import com.nnzz.nnzz.service.ResponseDetailService;
 import com.nnzz.nnzz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,13 +17,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.security.sasl.AuthenticationException;
 import java.util.regex.Pattern;
 
 @Tag(name="users", description = "냠냠쩝쩝 회원 추가 설정 및 회원 관리")
@@ -30,6 +29,7 @@ import java.util.regex.Pattern;
 @RequestMapping("api/user")
 @RequiredArgsConstructor
 public class UserController {
+    private final ResponseDetailService responseDetailService;
     private final UserService userService;
     private final AuthService authService;
 
@@ -169,7 +169,7 @@ public class UserController {
         if(auth != null && auth.isAuthenticated()) {
             // 로그아웃 처리
             userService.logout(token);
-            ResponseDetail responseDetail = userService.returnLogoutResponse(httpServletRequest.getRequestURI());
+            ResponseDetail responseDetail = responseDetailService.returnLogoutResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail);
         } else {
             throw new UnauthorizedException("로그인 된 사용자가 아닙니다.");
@@ -234,7 +234,7 @@ public class UserController {
         // 이 아니면 업데이트
 
         userService.updateUser(userToUpdate);
-        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
+        ResponseDetail response = responseDetailService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -259,7 +259,7 @@ public class UserController {
         }
 
         userService.updateUserNickname(nickname, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
+        ResponseDetail response = responseDetailService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -281,7 +281,7 @@ public class UserController {
         String gender = request.getGender();
 
         userService.updateUserAgeRangeAndGender(gender, ageRange, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
+        ResponseDetail response = responseDetailService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -301,7 +301,7 @@ public class UserController {
         String profileImage = request.getProfileImage();
 
         userService.updateUserProfileImage(profileImage, authUserId);
-        ResponseDetail response = userService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
+        ResponseDetail response = responseDetailService.returnUpdateUserResponse(httpServletRequest.getRequestURI());
         return ResponseEntity.ok(response);
     }
 
@@ -326,7 +326,7 @@ public class UserController {
 
         try {
             userService.deleteUser(userId);
-            ResponseDetail responseDetail = userService.returnDeleteUserResponse(httpServletRequest.getRequestURI());
+            ResponseDetail responseDetail = responseDetailService.returnDeleteUserResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail);
         } catch (Exception e) {
             throw new RuntimeException("알 수 없는 오류입니다.");
@@ -358,7 +358,7 @@ public class UserController {
         } else if (isDuplicate) {
             throw new InvalidValueException("닉네임 : " + nickname + " 이미 사용중인 닉네임입니다.");
         } else {
-            ResponseDetail responseDetail = userService.returnCheckNicknameResponse(httpServletRequest.getRequestURI());
+            ResponseDetail responseDetail = responseDetailService.returnCheckNicknameResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail);
         }
     }

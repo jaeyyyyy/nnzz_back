@@ -1,14 +1,16 @@
 package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.config.jwt.JwtToken;
-import com.nnzz.nnzz.dto.*;
+import com.nnzz.nnzz.dto.BlacklistToken;
+import com.nnzz.nnzz.dto.LoginUserDTO;
+import com.nnzz.nnzz.dto.UserDTO;
+import com.nnzz.nnzz.dto.UserResponse;
 import com.nnzz.nnzz.exception.EmailIsNullExcepion;
 import com.nnzz.nnzz.exception.InvalidValueException;
 import com.nnzz.nnzz.exception.NicknameUpdateException;
 import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.repository.BlacklistTokenMapper;
 import com.nnzz.nnzz.repository.UserMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -28,60 +28,6 @@ import java.util.regex.Pattern;
 public class UserService {
     private final UserMapper userMapper;
     private final BlacklistTokenMapper blacklistTokenMapper;
-
-    // 유저 업데이트 성공시 응답
-    public ResponseDetail returnUpdateUserResponse(String requestURI) {
-        return new ResponseDetail(
-                "about:blank",
-                "OK",
-                200,
-                "사용자가 성공적으로 업데이트되었습니다.",
-                requestURI,
-                LocalDateTime.now().toString(),
-                "업데이트 완료"
-        );
-    }
-
-    // 유저 로그아웃 성공시 응답
-    public ResponseDetail returnLogoutResponse(String requestURI) {
-        return new ResponseDetail(
-                "about:blank",
-                "OK",
-                200,
-                "사용자가 성공적으로 로그아웃 하였습니다.",
-                requestURI,
-                LocalDateTime.now().toString(),
-                "로그아웃 완료"
-        );
-    }
-
-    // 유저 탈퇴 성공시 응답
-    public ResponseDetail returnDeleteUserResponse(String requestURI) {
-        return new ResponseDetail(
-                "about:blank",
-                "OK",
-                200,
-                "사용자가 성공적으로 탈퇴하였습니다.",
-                requestURI,
-                LocalDateTime.now().toString(),
-                "탈퇴 완료"
-        );
-    }
-
-    // 닉네임 체크 성공시 응답
-    public ResponseDetail returnCheckNicknameResponse(String requestURI) {
-        return new ResponseDetail(
-                "about:blank",
-                "OK",
-                200,
-                "사용가능한 닉네임입니다.",
-                requestURI,
-                LocalDateTime.now().toString(),
-                "사용가능한 닉네임입니다."
-        );
-    }
-
-
 
     public UserResponse returnUserResponse(JwtToken jwtToken, UserDTO loginUser) {
         LoginUserDTO loginUserDTO = LoginUserDTO.builder()

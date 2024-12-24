@@ -24,6 +24,9 @@
 <img src="https://github.com/user-attachments/assets/61341708-9cd9-4840-bcd4-1ba2ab544483" width="300px">
 <img src="https://github.com/user-attachments/assets/ef31fe6e-b237-4b91-a07a-90f76d95faf4" width="300px">
 
+## 📌 프로그램 구조도
+<img src="https://github.com/user-attachments/assets/65ba7ca8-f01c-487b-9363-eff79a92f507">
+
 
 ## 🔧 기술 스택
 우리 프로젝트는 이런 기술로 만들어졌어요!

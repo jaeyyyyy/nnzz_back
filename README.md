@@ -21,8 +21,8 @@
 - 👍👎 선호도 반영: 먹고 싶은 메뉴와 그렇지 않은 메뉴를 직접 선택
   
 ## 📸 이렇게 생겼어요
-앱 스크린샷
-
+<img src="https://github.com/user-attachments/assets/61341708-9cd9-4840-bcd4-1ba2ab544483" width="300px">
+<img src="https://github.com/user-attachments/assets/ef31fe6e-b237-4b91-a07a-90f76d95faf4" width="300px">
 
 
 ## 🔧 기술 스택

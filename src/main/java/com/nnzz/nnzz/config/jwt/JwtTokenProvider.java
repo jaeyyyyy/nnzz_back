@@ -118,7 +118,7 @@ public class JwtTokenProvider {
 
         // SecurityUser
         SecurityUser principal = new SecurityUser(userId, claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, accessToken, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
 
         // UseInfoDetails 객체를 만들어서 Authentication return
         // UserInfoDetails principal = new UserInfoDetails(claims.getSubject(), "", authorities);

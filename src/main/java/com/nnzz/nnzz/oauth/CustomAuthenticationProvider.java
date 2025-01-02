@@ -28,7 +28,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         // Authentication 새 객체 생성
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
-                token,
+                null,
                 userDetails.getAuthorities()
         );
     }

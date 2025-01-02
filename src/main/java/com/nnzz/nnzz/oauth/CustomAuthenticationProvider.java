@@ -16,12 +16,11 @@ import org.springframework.stereotype.Component;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private final UserDetailsService userDetailsService;
-    private final CustomUserDetailsService customUserDetailsService;
-    private final Seed seed;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
+        String token = authentication.getCredentials().toString();
 
         // UserDetails 사용
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -29,7 +28,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         // Authentication 새 객체 생성
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
-                null,
+                token,
                 userDetails.getAuthorities()
         );
     }

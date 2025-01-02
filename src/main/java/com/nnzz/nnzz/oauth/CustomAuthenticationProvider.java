@@ -20,7 +20,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
-        String token = authentication.getCredentials().toString();
+        // String token = authentication.getCredentials().toString();
 
         // UserDetails 사용
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);

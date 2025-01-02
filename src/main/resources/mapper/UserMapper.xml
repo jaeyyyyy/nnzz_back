@@ -27,8 +27,8 @@
 
     <!--유저 추가-->
     <insert id="createUser" parameterType="UserDTO" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO users (email, nickname, profile_image, gender, age_range)
-        VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange})
+        INSERT INTO users (email, nickname, profile_image, gender, age_range, join_date)
+        VALUES (#{email}, #{nickname}, #{profileImage}, #{gender}, #{ageRange}, #{joinDate})
     </insert>
 
     <!--유저 정보 수정(플필 이미지 변경)-->

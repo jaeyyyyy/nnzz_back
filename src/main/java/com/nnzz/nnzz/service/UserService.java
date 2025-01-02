@@ -171,6 +171,7 @@ public class UserService {
                 .profileImage(user.getProfileImage())
                 .gender(user.getGender())
                 .ageRange(user.getAgeRange())
+                .joinDate(LocalDateTime.now()) // 회원가입일자 추가
                 .build();
         userMapper.createUser(savedUser);
         return savedUser;

@@ -17,6 +17,7 @@ public class UserDTO {
     private String profileImage;
     private String gender;
     private String ageRange;
+    private LocalDateTime joinDate; // 회원가입일자 추가
     private LocalDateTime lastNicknameChangeDate;
 
     @Builder

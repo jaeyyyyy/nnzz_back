@@ -1,7 +1,5 @@
 package com.nnzz.nnzz.oauth;
 
-import com.nnzz.nnzz.config.seed.Seed;
-import com.nnzz.nnzz.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +19,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
         // String token = authentication.getCredentials().toString();
+        // Cannot invoke \"Object.toString()\" because the return value of \"org.springframework.security.core.Authentication.getCredentials()\" is null
 
         // UserDetails 사용
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);

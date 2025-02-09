@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.security.core.parameters.P;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Mapper
@@ -37,4 +38,7 @@ public interface UserMapper {
 
     @Select("DELETE FROM users WHERE user_id=#{userId}")
     void deleteUserByUserId(int userId);
+
+    // 최근로그인시간 추가
+    void updateLastLoginDate(@Param("lastLoginDate") LocalDateTime lastLoginDate, @Param("userId") Integer userId);
 }

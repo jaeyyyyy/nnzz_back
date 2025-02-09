@@ -224,4 +224,13 @@ public class UserService {
         // 사용자 삭제
         userMapper.deleteUserByUserId(userId);
     }
+
+    // 최근 로그인 날짜 추가
+    @Transactional
+    public void updateLastLoginDate(int userId) {
+        Optional<UserDTO> user = getOptionalUserByUserId(userId);
+        if (user.isPresent()) {
+            userMapper.updateLastLoginDate(LocalDateTime.now(), userId);
+        }
+    }
 }

@@ -19,6 +19,7 @@ public class UserDTO {
     private String ageRange;
     private LocalDateTime joinDate; // 회원가입일자 추가
     private LocalDateTime lastNicknameChangeDate;
+    private LocalDateTime lastLoginDate; // 최근로그인일자 추가
 
     @Builder
     @Getter

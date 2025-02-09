@@ -104,6 +104,8 @@ public class UserController {
             System.out.println("loginUser : " + loginUser);
 
             if(loginUser != null) {
+                // 최근 로그인 날짜 업데이트 하기
+                userService.updateLastLoginDate(loginUser.getUserId());
                 // 토큰 생성
                 JwtToken jwtToken = authService.signIn(email);
                 // 토큰과 함께 유저 정보 반환

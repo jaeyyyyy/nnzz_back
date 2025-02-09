@@ -38,11 +38,6 @@ public class AuthService {
         // 4. accessToken 앞에 "Bearer "를 붙여서 반환
         String bearerAccessToken = "Bearer " + jwtToken.getAccessToken();
 
-        //UserDTO loginUser = userService.getOptionalUserByEmail(email).orElse(null);
-        //if (loginUser != null) {
-        //    userService.updateLastLoginDate(loginUser.getUserId());
-        //}
-
         // 5. 수정된 JwtToken 객체 반환
         return JwtToken.builder()
                 .accessToken(bearerAccessToken)

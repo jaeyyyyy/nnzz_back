@@ -40,12 +40,13 @@ public class FindStoreController {
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
-            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = true),
+            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = false),
     })
     @GetMapping("/lunch/category")
     public ResponseEntity<List<CategoryDTO>> getLunchCategories(
             @AuthenticationPrincipal SecurityUser user,
-            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day, @RequestParam boolean choice) {
+            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day,
+            @RequestParam(defaultValue = "false") boolean choice) {
 
         if(user == null) {
             // 인증되지 않은 사용자
@@ -75,12 +76,13 @@ public class FindStoreController {
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
-            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = true),
+            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = false),
     })
     @GetMapping("/dinner/category")
     public ResponseEntity<List<CategoryDTO>> getDinnerCategories(
             @AuthenticationPrincipal SecurityUser user,
-            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day, @RequestParam boolean choice) {
+            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day,
+            @RequestParam(defaultValue = "false") boolean choice) {
 
         if(user == null) {
             throw new UnauthorizedException("인증되지 않은 사용자입니다.");

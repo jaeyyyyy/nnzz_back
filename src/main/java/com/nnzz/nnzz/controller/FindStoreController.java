@@ -40,15 +40,25 @@ public class FindStoreController {
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
+            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = true),
     })
     @GetMapping("/lunch/category")
     public ResponseEntity<List<CategoryDTO>> getLunchCategories(
             @AuthenticationPrincipal SecurityUser user,
-            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day) {
+            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day, @RequestParam boolean choice) {
+
         if(user == null) {
+            // 인증되지 않은 사용자
             throw new UnauthorizedException("인증되지 않은 사용자입니다.");
         } else {
-            List<CategoryDTO> category = findStoreService.getLunchCategoriesByLocation(lat, lng, day);
+            List<CategoryDTO> category;
+            if(choice) {
+                // 가능한 카테고리들 중에서 15개를 랜덤으로 보여줍니다
+                category = findStoreService.getLunchCategoriesByLocationAndChoice(lat, lng, day);
+            } else {
+                // 가능한 카테고리들 전부를 보여주는 기존 코드
+                category = findStoreService.getLunchCategoriesByLocation(lat, lng, day);
+            }
             return ResponseEntity.ok(category);
         }
     }
@@ -65,15 +75,24 @@ public class FindStoreController {
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),
             @Parameter(name = "lng", description = "double 타입, 사용자의 경도", required = true),
             @Parameter(name = "day", description = "String 타입 'yyyy-MM-dd' 형태, 사용자가 선택한 날짜", required = true),
+            @Parameter(name = "choice", description = "boolean 타입, 값이 없거나 false: 30개 카테고리 전부, true: 15개 카테고리를 랜덤으로", required = true),
     })
     @GetMapping("/dinner/category")
     public ResponseEntity<List<CategoryDTO>> getDinnerCategories(
             @AuthenticationPrincipal SecurityUser user,
-            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day) {
+            @RequestParam Double lng, @RequestParam Double lat, @RequestParam String day, @RequestParam boolean choice) {
+
         if(user == null) {
             throw new UnauthorizedException("인증되지 않은 사용자입니다.");
         } else {
-            List<CategoryDTO> category = findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
+            List<CategoryDTO> category;
+            if(choice) {
+                // 가능한 카테고리들 중에서 15개를 랜덤으로 보여줌
+                category = findStoreService.getDinnerCategoriesByLocationAndChoice(lat, lng, day);
+            } else {
+                // 가능한 카테고리들 전부를 보여주는 기존 코드
+                category = findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
+            }
             return ResponseEntity.ok(category);
         }
     }

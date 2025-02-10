@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,20 +37,24 @@ public class FindStoreService {
         }
     }
 
-    // 점심 랜덤 카테고리 뽑기
+    // 카테고리를 랜덤으로 count 개수만큼 뽑기
+    private List<CategoryDTO> getRandomCategories(List<CategoryDTO> categories, int count) {
+        // 전체 목록의 크기가 count보다 작으면 가능한 최대만큼 가져옴
+        int size = Math.min(count, categories.size());
+
+        // 랜덤으로 아이템 선택
+        Collections.shuffle(categories);
+        return new ArrayList<>(categories.subList(0, size));
+    }
+
+    // 점심 랜덤 카테고리 1개 뽑기
     public CategoryDTO getLunchRandomCategory(double currentLat, double currentLong, String dateString) {
         List<CategoryDTO> lunchCategories = getLunchCategoriesByLocation(currentLat, currentLong, dateString);
-        // 리스트가 비어있지 않은지 확인
-        if(lunchCategories.isEmpty()) {
+        if(lunchCategories.isEmpty()) { // 리스트가 비어있지 않은지 확인
             throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-
-        // 랜덤 객체 생성
         Random random = new Random();
-
-        // 랜덤 인덱스 생성
         int randomIndex = random.nextInt(lunchCategories.size());
-
         // 랜덤으로 선택된 CategoryDTO 반환
         return lunchCategories.get(randomIndex);
     }
@@ -61,25 +62,17 @@ public class FindStoreService {
     // 저녁 랜덤 카테고리 뽑기
     public CategoryDTO getDinnerRandomCategory(double currentLat, double currentLong, String dateString) {
         List<CategoryDTO> dinnerCategories = getDinnerCategoriesByLocation(currentLat, currentLong, dateString);
-        // 리스트가 비어있지 않은지 확인
-        if(dinnerCategories.isEmpty()) {
+        if(dinnerCategories.isEmpty()) { // 리스트가 비어있지 않은지 확인
             throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
         }
-
-        // 랜덤 객체 생성
         Random random = new Random();
-
-        // 랜덤 인덱스 생성
         int randomIndex = random.nextInt(dinnerCategories.size());
-
         // 랜덤으로 선택된 CategoryDTO 반환
         return dinnerCategories.get(randomIndex);
     }
 
-
-
     // 1. 현재 선택 가능한 카테고리를 가져오기
-    // 점심 가능 카테고리 가져오기
+    // 점심 가능 카테고리 가져오기(choice=false)
     public List<CategoryDTO> getLunchCategoriesByLocation(double currentLat, double currentLong, String dateString) {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
@@ -98,7 +91,30 @@ public class FindStoreService {
         return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
     }
 
-    // 저녁 가능 카테고리 가져오기
+    // 점심 가능 카테고리 가져오기(choice = true)
+    public List<CategoryDTO> getLunchCategoriesByLocationAndChoice(double currentLat, double currentLong, String dateString) {
+        // 1단계 : 반경 750m 안의 store_id 값 가져오기
+        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        }
+
+        // 오늘의 요일 가져오기
+        String currentDay = getCurrentDayOfWeek(dateString);
+
+        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+        List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
+
+        // 3단계 : 최종적으로 category 가져오기
+        List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+
+        // 랜덤으로 15개 아이템 선택
+        return getRandomCategories(allCategories, 15);
+    }
+
+
+    // 저녁 가능 카테고리 가져오기(choice = false)
     public List<CategoryDTO> getDinnerCategoriesByLocation(double currentLat, double currentLong, String dateString) {
         // 1단계 : 반경 750m 안의 store_id 값 가져오기
         List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
@@ -115,6 +131,26 @@ public class FindStoreService {
 
         // 3단계 : 최종적으로 category 가져오기
         return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+    }
+
+    // 저녁 가능 카테고리 가져오기(choice = true)
+    public List<CategoryDTO> getDinnerCategoriesByLocationAndChoice(double currentLat, double currentLong, String dateString) {
+        // 1단계 : 반경 750m 안의 store_id 값 가져오기
+        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        }
+
+        // 오늘의 요일 가져오기
+        String currentDay = getCurrentDayOfWeek(dateString);
+
+        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+        List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
+
+        // 3단계 : 최종적으로 category 가져오기
+        List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+        return getRandomCategories(allCategories, 15);
     }
 
     // 2. 가능한 가게 store_id를 가져오기

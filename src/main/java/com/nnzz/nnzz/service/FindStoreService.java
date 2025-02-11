@@ -44,7 +44,12 @@ public class FindStoreService {
 
         // 랜덤으로 아이템 선택
         Collections.shuffle(categories);
-        return new ArrayList<>(categories.subList(0, size));
+        List<CategoryDTO> randomCategories = new ArrayList<>(categories.subList(0, size));
+
+        // distance 값에 따라 정렬
+        randomCategories.sort(Comparator.comparingInt(CategoryDTO::getDistance));
+        return randomCategories;
+
     }
 
     // 점심 랜덤 카테고리 1개 뽑기

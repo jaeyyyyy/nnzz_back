@@ -6,14 +6,17 @@
 <mapper namespace="com.nnzz.nnzz.repository.FindStoreMapper">
 
     <!--서초구, 강남구, 송파구, 강동구 만 한정해서 사용 가능하게 합니다.-->
-    <select id="getAvailableRegion" resultType="String">
-        <![CDATA[
-        SELECT EXISTS (
-            SELECT 1
-            FROM sig
-            WHERE (sig_cd = '11650' or sig_cd = '11680' or sig_cd = '11710' or sig_cd = '11740')
-              and ST_Contains(geom, ST_SetSRID(ST_MakePoint(#{currentLong}, #{currentLat}), 4326))
-        )
+    <select id="getAvailableRegion" resultType="Boolean">
+    <![CDATA[
+        SELECT CASE
+                   WHEN EXISTS (
+                       SELECT 1
+                       FROM sig
+                       WHERE (sig_cd = '11650' or sig_cd = '11680' or sig_cd = '11710' or sig_cd = '11740')
+                         and ST_Contains(geom, ST_SetSRID(ST_MakePoint(#{currentLong}, #{currentLat}), 4326))
+                   ) THEN true
+                   ELSE false
+                   END
         ]]>
     </select>
 

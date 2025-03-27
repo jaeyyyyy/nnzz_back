@@ -2,6 +2,7 @@ package com.nnzz.nnzz.service;
 
 import com.nnzz.nnzz.dto.UserLocationDTO;
 import com.nnzz.nnzz.exception.AlreadyRequestedLocationException;
+import com.nnzz.nnzz.repository.FindStoreMapper;
 import com.nnzz.nnzz.repository.UserLocationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserLocationService {
+    private final FindStoreMapper findStoreMapper;
     private final UserLocationMapper userLocationMapper;
+
+    public boolean isWithinRegion(double lat, double lng) {
+        return findStoreMapper.getAvailableRegion(lat, lng);
+    }
+
 
     public boolean isWithinStation(double lat1, double lng1, double lat2, double lng2) {
         double distance = calculateDistance(lat1, lng1, lat2, lng2);

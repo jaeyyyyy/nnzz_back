@@ -26,13 +26,14 @@ public class UserLocationController {
     private final ResponseDetailService responseDetailService;
     private final UserLocationService userLocationService;
 
-    private static final double[][] STATIONS = {
-            {37.4939732, 127.0146391}, // 교대역
-            {37.4979526, 127.0276241}, // 강남역
-            {37.5006431, 127.0363764}, // 역삼역
-            {37.5045850, 127.0492805}, // 선릉역
-            {37.5088803, 127.0631067} // 삼성역
-    };
+    // 역 단위로 제공하던 이전 코드
+//    private static final double[][] STATIONS = {
+//            {37.4939732, 127.0146391}, // 교대역
+//            {37.4979526, 127.0276241}, // 강남역
+//            {37.5006431, 127.0363764}, // 역삼역
+//            {37.5045850, 127.0492805}, // 선릉역
+//            {37.5088803, 127.0631067} // 삼성역
+//    };
 
 
     @Operation(summary = "get user location", description = "<strong>\uD83D\uDCA1유저가 저장한 위치를 전체 조회")
@@ -69,17 +70,17 @@ public class UserLocationController {
         double lng = request.getLng();
         String address = request.getAddress();
 
-        boolean withinAnyStation = false; // 조건 만족 여부를 추적하는 변수
+        boolean withinAnyStation = userLocationService.isWithinRegion(lat, lng); // 조건 만족 여부를 추적하는 변수
 
-        for (double[] station : STATIONS) {
-            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
-                withinAnyStation = true; // 조건 만족 시 true로 설정
-                break; // 조건 만족하면 더 이상 체크할 필요 없음
-            }
-        }
+//        for (double[] station : STATIONS) {
+//            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
+//                withinAnyStation = true; // 조건 만족 시 true로 설정
+//                break; // 조건 만족하면 더 이상 체크할 필요 없음
+//            }
+//        }
 
         if (withinAnyStation) {
-            throw new AlreadyValidLocationException(lat, lng); // 모든 역에서 범위가 아닐 때만 오픈 요청 가능
+            throw new AlreadyValidLocationException(lat, lng); // 해당하는 지역이 아닐 때만 오픈 요청 가능
         } else {
             userLocationService.openUserLocation(authUserId, lat, lng, address);
             ResponseDetail responseDetail = responseDetailService.returnOpenLocationResponse(httpServletRequest.getRequestURI());
@@ -110,21 +111,21 @@ public class UserLocationController {
         double lng = request.getLng();
         String address = request.getAddress();
 
-        boolean withinAnyStation = false; // 조건 만족 여부를 추적하는 변수
+        boolean withinAnyStation = userLocationService.isWithinRegion(lat, lng); // 조건 만족 여부를 추적하는 변수
 
-        for (double[] station : STATIONS) {
-            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
-                userLocationService.saveUserLocation(authUserId, lat, lng, address);
-                withinAnyStation = true; // 조건 만족 시 true로 설정
-                break; // 조건 만족하면 더 이상 체크할 필요 없음
-            }
-        }
+//        for (double[] station : STATIONS) {
+//            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
+//                userLocationService.saveUserLocation(authUserId, lat, lng, address);
+//                withinAnyStation = true; // 조건 만족 시 true로 설정
+//                break; // 조건 만족하면 더 이상 체크할 필요 없음
+//            }
+//        }
 
         if (!withinAnyStation) {
-            throw new InvalidLocationException(lat, lng); // 모든 역에서 범위가 아닌 경우 예외 발생
+            throw new InvalidLocationException(lat, lng); // 해당하는 지역이 아닌 경우 예외 발생
         } else {
             ResponseDetail responseDetail = responseDetailService.returnSaveLocationResponse(httpServletRequest.getRequestURI());
-            return ResponseEntity.ok(responseDetail); // 모든 역에서 범위가 아닌 경우 예외 발생
+            return ResponseEntity.ok(responseDetail); // 해당하는 지역이 아닌 경우 예외 발생
         }
     }
 }

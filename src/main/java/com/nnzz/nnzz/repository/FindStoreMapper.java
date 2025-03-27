@@ -8,6 +8,10 @@ import java.util.List;
 
 @Mapper
 public interface FindStoreMapper {
+
+    // 가능한 지역인지 여부를 반환하기
+    Boolean getAvailableRegion(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong);
+
     // 가능한 카테고리를 반환하기
     // 1단계: 반경 750m, 500m, 250m 안의 store_id 가져오기
     List<String> get750NearbyStoreIds(@Param("currentLat") double currentLat, @Param("currentLong") double currentLong);

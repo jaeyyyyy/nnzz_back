@@ -79,182 +79,276 @@ public class FindStoreService {
     // 1. 현재 선택 가능한 카테고리를 가져오기
     // 점심 가능 카테고리 가져오기(choice=false)
     public List<CategoryDTO> getLunchCategoriesByLocation(double currentLat, double currentLong, String dateString) {
-        // 1단계 : 반경 750m 안의 store_id 값 가져오기
-        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 반경 750m 안의 store_id 값 가져오기
+            List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+            if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+            List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
+
+            // 3단계 : 최종적으로 category 가져오기
+            return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
 
-        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
-        List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
-
-        // 3단계 : 최종적으로 category 가져오기
-        return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
     }
 
     // 점심 가능 카테고리 가져오기(choice = true)
     public List<CategoryDTO> getLunchCategoriesByLocationAndChoice(double currentLat, double currentLong, String dateString) {
-        // 1단계 : 반경 750m 안의 store_id 값 가져오기
-        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 반경 750m 안의 store_id 값 가져오기
+            List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+            if (nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+            List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
+
+            // 3단계 : 최종적으로 category 가져오기
+            List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+
+            // 랜덤으로 15개 아이템 선택
+            return getRandomCategories(allCategories, 15);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
-
-        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
-        List<String> validStoreIds = findStoreMapper.getLunchValidStoreIds(nearByStoreIds, currentDay);
-
-        // 3단계 : 최종적으로 category 가져오기
-        List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
-
-        // 랜덤으로 15개 아이템 선택
-        return getRandomCategories(allCategories, 15);
     }
 
 
     // 저녁 가능 카테고리 가져오기(choice = false)
     public List<CategoryDTO> getDinnerCategoriesByLocation(double currentLat, double currentLong, String dateString) {
-        // 1단계 : 반경 750m 안의 store_id 값 가져오기
-        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 반경 750m 안의 store_id 값 가져오기
+            List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+            if (nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+            List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
+
+            // 3단계 : 최종적으로 category 가져오기
+            return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
-
-        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
-        List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
-
-        // 3단계 : 최종적으로 category 가져오기
-        return findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
     }
 
     // 저녁 가능 카테고리 가져오기(choice = true)
     public List<CategoryDTO> getDinnerCategoriesByLocationAndChoice(double currentLat, double currentLong, String dateString) {
-        // 1단계 : 반경 750m 안의 store_id 값 가져오기
-        List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        if(nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 반경 750m 안의 store_id 값 가져오기
+            List<String> nearByStoreIds = findStoreMapper.get750NearbyStoreIds(currentLat, currentLong);
+
+            if (nearByStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
+            List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
+
+            // 3단계 : 최종적으로 category 가져오기
+            List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
+            return getRandomCategories(allCategories, 15);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
-
-        // 2단계 : business_hours에서 조건에 맞는 store_id 가져오기
-        List<String> validStoreIds = findStoreMapper.getDinnerValidStoreIds(nearByStoreIds, currentDay);
-
-        // 3단계 : 최종적으로 category 가져오기
-        List<CategoryDTO> allCategories = findStoreMapper.getCategories(currentLat, currentLong, validStoreIds);
-        return getRandomCategories(allCategories, 15);
     }
 
     // 2. 가능한 가게 store_id를 가져오기
     // 750 점심
     public List<String> get750NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 750 저녁
     public List<String> get750NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores750NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
 
     // 500 점심
     public List<String> get500NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 500 저녁
     public List<String> get500NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores500NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
 
     // 250 점심
     public List<String> get250NearbyLunchStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getLunchValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 250 저녁
     public List<String> get250NearbyDinnerStoreIds(double currentLat, double currentLong, String dateString, List<Integer> categories) {
-        // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
-        List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
 
-        // 오늘의 요일 가져오기
-        String currentDay = getCurrentDayOfWeek(dateString);
+        // 서비스 중인 지역인지 확인
+        Boolean available = findStoreMapper.getAvailableRegion(currentLat, currentLong);
 
-        // 2단계 : 점심영업중인 가게의 store_id 가져오기
-        if(nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
-            throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+        // 서비스 중인 지역이라면
+        if (available) {
+            // 1단계 : 750내의 선택한 카테고리 가게의 store_id 가져오기
+            List<String> nearbyStoreIds = findStoreMapper.getStores250NearbyAndByCategory(currentLat, currentLong, categories);
+
+            // 오늘의 요일 가져오기
+            String currentDay = getCurrentDayOfWeek(dateString);
+
+            // 2단계 : 점심영업중인 가게의 store_id 가져오기
+            if (nearbyStoreIds.isEmpty()) { // 만약 store_id가 없다면
+                throw new FindStoreException("선택한 카테고리의 가게가 없습니다.");
+            }
+
+            return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
+        } else {
+            // 가능한 지역이 아니라면
+            throw new FindStoreException("서비스 중인 지역이 아닙니다.");
         }
-
-        return findStoreMapper.getDinnerValidStoreIds(nearbyStoreIds, currentDay);
     }
 
     // 최종 가게 리스트 반환하기

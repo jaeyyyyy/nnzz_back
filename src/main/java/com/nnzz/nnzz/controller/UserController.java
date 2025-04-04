@@ -72,6 +72,9 @@ public class UserController {
         } else {
             // 조건 충족하면 회원가입시키고 로그인 -> 토큰과 함께 유저 정보를 반환
             UserDTO saveUser = userService.registerUser(user);
+            // 최근 로그인 날짜 업데이트 하기
+            userService.updateLastLoginDate(saveUser.getUserId());
+            // 토큰과 UserResponse 반환하기
             JwtToken jwtToken = authService.signIn(saveUser.getEmail());
             UserResponse response = userService.returnUserResponse(jwtToken, saveUser);
             return ResponseEntity.ok(response);

@@ -124,6 +124,7 @@ public class UserLocationController {
         if (!withinAnyStation) {
             throw new InvalidLocationException(lat, lng); // 해당하는 지역이 아닌 경우 예외 발생
         } else {
+            userLocationService.saveUserLocation(authUserId, lat, lng, address);
             ResponseDetail responseDetail = responseDetailService.returnSaveLocationResponse(httpServletRequest.getRequestURI());
             return ResponseEntity.ok(responseDetail); // 해당하는 지역이 아닌 경우 예외 발생
         }

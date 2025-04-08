@@ -115,7 +115,6 @@ public class UserLocationController {
 
 //        for (double[] station : STATIONS) {
 //            if(userLocationService.isWithinStation(lat, lng, station[0], station[1])) {
-//                userLocationService.saveUserLocation(authUserId, lat, lng, address);
 //                withinAnyStation = true; // 조건 만족 시 true로 설정
 //                break; // 조건 만족하면 더 이상 체크할 필요 없음
 //            }

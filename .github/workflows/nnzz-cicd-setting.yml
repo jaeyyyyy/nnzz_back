@@ -62,8 +62,6 @@ jobs:
 
       ###
 
-
-
       # application.properties 파일 생성
 #      - name: Make application.properties
 #        run: mkdir ./src/main/resources |

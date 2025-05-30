@@ -7,7 +7,7 @@
 
     <!--
     서초구, 강남구, 송파구, 강동구,
-    동작구, 관악구, 영등포구, 금천구
+    동작구, 관악구, 영등포구, 금천구, 구로구
     만 한정해서 사용할 수 있습니다.-->
     <select id="getAvailableRegion" resultType="Boolean">
     <![CDATA[
@@ -17,7 +17,7 @@
                        FROM sig
                        WHERE sig_cd IN(
                                 '11650', '11680', '11710', '11740',
-                                '11590', '11620', '11560', '11545'
+                                '11590', '11620', '11560', '11545', '11530'
                            )
                          and ST_Contains(geom, ST_SetSRID(ST_MakePoint(#{currentLong}, #{currentLat}), 4326))
                    ) THEN true

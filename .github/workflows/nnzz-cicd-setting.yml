@@ -37,40 +37,67 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # application.properties 파일 생성
-      - name: Make application.properties
-        run: mkdir ./src/main/resources |
-          touch ./src/main/resources/application.properties
-
-      - name: Deliver application.properties
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
-
-      # Gradle 설정 및 Build
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Change gradlew permissions
-        run: chmod +x ./gradlew
-
-      - name: Build with Gradle Wrapper
-        run: ./gradlew clean build
-
-      - name: List build/libs contents
-        run: ls build/libs
-
-
-      # Docker 로그인
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # Docker 이미지 생성 및 Push
-      - name: Docker build & Push
+      ###
+      - name: Ensure application.properties exists
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nnzz .
-          docker push ${{ secrets.DOCKER_USERNAME }}/nnzz
+            mkdir -p ./src/main/resources
+            echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+
+            - name: Make gradlew executable
+              run: chmod +x ./gradlew
+
+            - name: Build with Gradle
+              run: ./gradlew clean build --stacktrace
+
+            - name: Docker Login
+              uses: docker/login-action@v3
+              with:
+                username: ${{ secrets.DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Docker build & push
+              run: |
+                docker build -t ${{ secrets.DOCKER_USERNAME }}/nnzz .
+                docker push ${{ secrets.DOCKER_USERNAME }}/nnzz
+
+      ###
+
+
+
+      # application.properties 파일 생성
+#      - name: Make application.properties
+#        run: mkdir ./src/main/resources |
+#          touch ./src/main/resources/application.properties
+#
+#      - name: Deliver application.properties
+#        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+#
+#      # Gradle 설정 및 Build
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@v3
+#
+#      - name: Change gradlew permissions
+#        run: chmod +x ./gradlew
+#
+#      - name: Build with Gradle Wrapper
+#        run: ./gradlew clean build
+#
+#      - name: List build/libs contents
+#        run: ls build/libs
+#
+#
+#      # Docker 로그인
+#      - name: Docker Login
+#        uses: docker/login-action@v3
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#
+#      # Docker 이미지 생성 및 Push
+#      - name: Docker build & Push
+#        run: |
+#          docker build -t ${{ secrets.DOCKER_USERNAME }}/nnzz .
+#          docker push ${{ secrets.DOCKER_USERNAME }}/nnzz
 
 
   CD:

@@ -55,8 +55,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker build & push
-        run: |
         # 커밋 SHA 앞 8자리 사용
+        run: |
           TAG=${GITHUB_SHA::8}
           docker build -t ${{ secrets.DOCKER_USERNAME }}/nnzz:$TAG .
           docker push ${{ secrets.DOCKER_USERNAME }}/nnzz:$TAG

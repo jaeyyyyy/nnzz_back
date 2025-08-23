@@ -117,4 +117,4 @@ jobs:
             -v /etc/localtime:/etc/localtime:ro \
             -e TZ=Asia/Seoul \
             ${{ secrets.DOCKER_USERNAME }}/nnzz
-            sudo docker system prune -f
+            nohup sudo docker system prune -f >/dev/null 2>&1 &

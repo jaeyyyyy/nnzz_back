@@ -85,7 +85,17 @@ public class FindStoreController {
             @RequestParam(defaultValue = "false") boolean choice) {
 
         if(user == null) {
-            throw new UnauthorizedException("인증되지 않은 사용자입니다.");
+            // 인증되지 않은 사용자도 조회 가능
+            // throw new UnauthorizedException("인증되지 않은 사용자입니다.");
+            List<CategoryDTO> category;
+            if(choice) {
+                // 가능한 카테고리들 중에서 15개를 랜덤으로 보여줌
+                category = findStoreService.getDinnerCategoriesByLocationAndChoice(lat, lng, day);
+            } else {
+                // 가능한 카테고리들 전부를 보여주는 기존 코드
+                category = findStoreService.getDinnerCategoriesByLocation(lat, lng, day);
+            }
+            return ResponseEntity.ok(category);
         } else {
             List<CategoryDTO> category;
             if(choice) {

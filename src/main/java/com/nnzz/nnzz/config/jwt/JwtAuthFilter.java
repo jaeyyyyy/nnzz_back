@@ -84,13 +84,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      */
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
+        //  token이 없으면 null 반환
         if(bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Authorization 헤더는 반드시 Bearer 토큰 형식으로 주어져야 합니다.");
+            return null;
+            // throw new IllegalArgumentException("Authorization 헤더는 반드시 Bearer 토큰 형식으로 주어져야 합니다.");
         }
-
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
+        return bearerToken.substring(7);
+//        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+//            return bearerToken.substring(7);
+//        }
+//        return null;
     }
 }

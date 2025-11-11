@@ -68,9 +68,9 @@ public class FindStoreController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "가능한 카테고리 조회 성공"),
             @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역",
-                    content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
                     content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
+            // ,@ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
+            //      content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
     })
     @Parameters({
             @Parameter(name = "lat", description = "double 타입, 사용자의 위도", required = true),

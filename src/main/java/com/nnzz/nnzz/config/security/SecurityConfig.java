@@ -53,8 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // 모든 OPTIONS 요청 허용
                         .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/find/**").permitAll()
-                        .requestMatchers("/api/user/age-and-gender","/api/user/nickname","/api/user/profile-image","/api/user/update","/api/user/logout","/api/user").authenticated()
+                        .requestMatchers("/api/**").permitAll()
+                        // .requestMatchers("/api/user/age-and-gender","/api/user/nickname","/api/user/profile-image","/api/user/update","/api/user/logout","/api/user").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 

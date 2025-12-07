@@ -1,10 +1,12 @@
 package com.nnzz.nnzz.controller;
 
+import com.nnzz.nnzz.config.security.SecurityUser;
 import com.nnzz.nnzz.config.security.SecurityUtils;
 import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
 import com.nnzz.nnzz.exception.AlreadyValidLocationException;
 import com.nnzz.nnzz.exception.InvalidLocationException;
+import com.nnzz.nnzz.exception.UserNotExistsException;
 import com.nnzz.nnzz.service.ResponseDetailService;
 import com.nnzz.nnzz.service.UserLocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -92,7 +95,7 @@ public class UserLocationController {
     @Operation(summary = "save user location", description = "<strong>\uD83D\uDCA1유저의 위치를 db에 저장.</strong><br>최대 3개 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "위치 저장 성공"),
-            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역",
+            @ApiResponse(responseCode = "400", description = "오픈되지 않은 지역 및 헤더에 토큰 없음",
                     content = @Content(schema = @Schema(implementation = ResponseDetail.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 상태에서 접근",
                     content = @Content(schema = @Schema(implementation = ResponseDetail.class)))
@@ -103,9 +106,18 @@ public class UserLocationController {
             @Parameter(name = "address", description = "String 타입, 주소", required = true)
     })
     @PostMapping("/save")
-    public ResponseEntity<?> saveUserLocation(@RequestBody SaveLocationRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> saveUserLocation(
+            @AuthenticationPrincipal SecurityUser user,
+            @RequestBody SaveLocationRequest request, HttpServletRequest httpServletRequest) {
 
-        int authUserId = SecurityUtils.getUserId();
+        // 토큰 직접 제어 방식으로 수정
+        // int authUserId = SecurityUtils.getUserId();
+
+        // 토큰이 없는 경우
+        if(user == null) {
+            throw new UserNotExistsException("헤더에 토큰이 없습니다.");
+        }
+        int authUserId = user.getUserId(); // SecurityUtils 대신 user 에서 추출
 
         double lat = request.getLat();
         double lng = request.getLng();

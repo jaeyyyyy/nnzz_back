@@ -6,7 +6,7 @@ import com.nnzz.nnzz.dto.ResponseDetail;
 import com.nnzz.nnzz.dto.SaveLocationRequest;
 import com.nnzz.nnzz.exception.AlreadyValidLocationException;
 import com.nnzz.nnzz.exception.InvalidLocationException;
-import com.nnzz.nnzz.exception.UserNotExistsException;
+import com.nnzz.nnzz.exception.NoTokenException;
 import com.nnzz.nnzz.service.ResponseDetailService;
 import com.nnzz.nnzz.service.UserLocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -115,7 +115,7 @@ public class UserLocationController {
 
         // 토큰이 없는 경우
         if(user == null) {
-            throw new UserNotExistsException("헤더에 토큰이 없습니다.");
+            throw new NoTokenException("헤더에 토큰이 없습니다.");
         }
         int authUserId = user.getUserId(); // SecurityUtils 대신 user 에서 추출
 

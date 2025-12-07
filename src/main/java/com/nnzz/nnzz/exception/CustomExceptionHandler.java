@@ -4,6 +4,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -74,6 +75,12 @@ public class CustomExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
         return createProblemDetail(HttpStatus.UNAUTHORIZED, "유효한 토큰 값이 아닙니다.", ex.getMessage());
+    }
+
+    // 헤더에 토큰 없는 경우 400
+    @ExceptionHandler(NoTokenException.class)
+    public ProblemDetail handleNoTokenException(NoTokenException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "헤더에 토큰이 없습니다.", ex.getMessage());
     }
 
     // 회원가입 시 오류
